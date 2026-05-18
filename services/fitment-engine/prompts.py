@@ -1,5 +1,6 @@
 import json
-from schemas import ScoreRequest
+from typing import Optional
+from schemas import ScoreRequest, ResumeBaseline
 
 PROMPT_VERSION = '1.0'
 
@@ -90,11 +91,9 @@ REQUIRED OUTPUT SCHEMA:
 """
 
 
-def build_scoring_prompt(request: ScoreRequest) -> dict:
+def build_scoring_prompt(request: ScoreRequest, resume: Optional[ResumeBaseline]) -> dict:
     profile_json = request.profile.model_dump_json(indent=2)
-    resumes_json = json.dumps(
-        [r.model_dump() for r in request.resumes], indent=2
-    )
+    resume_json = json.dumps(resume.model_dump(), indent=2) if resume else "No resume provided."
 
     user_content = f"""
 JOB POSTING
@@ -110,9 +109,9 @@ CANDIDATE PROFILE
 =================
 {profile_json}
 
-RESUME BASELINES
-================
-{resumes_json}
+RESUME BASELINE
+===============
+{resume_json}
 
 Evaluate this candidate for this role and return the JSON assessment.
 """

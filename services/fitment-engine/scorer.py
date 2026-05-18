@@ -12,7 +12,8 @@ MODEL  = os.getenv('MODEL', 'claude-haiku-4-5-20251001')
 
 
 def score_job(request: ScoreRequest) -> FitAssessment:
-    prompt = build_scoring_prompt(request)
+    best_resume = select_best_resume(request.job, request.resumes)
+    prompt = build_scoring_prompt(request, best_resume)
     raw    = call_llm(prompt)
     parsed = parse_response(raw)
     result = build_assessment(parsed, request)
@@ -33,7 +34,11 @@ def _make_llm_call(prompt: dict):
         model=MODEL,
         max_tokens=2048,
         temperature=0,          # non-negotiable -- do not change
-        system=prompt['system'],
+        system=[{
+            'type': 'text',
+            'text': prompt['system'],
+            'cache_control': {'type': 'ephemeral'},
+        }],
         messages=[{'role': 'user', 'content': prompt['user']}]
     )
 
