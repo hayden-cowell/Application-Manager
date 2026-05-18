@@ -1,0 +1,44 @@
+{
+  "resume_id": "resume_early_career",
+  "name": "Consumer Apps PM",
+  "role_type": "consumer",
+  "version": 1,
+  "last_used": "2026-03-10",
+  "skills": [
+    "Product Management", "User Research", "A/B Testing", "Growth",
+    "Mobile (iOS/Android)", "SQL", "Google Analytics", "Mixpanel",
+    "Agile", "Wireframing", "Figma"
+  ],
+  "work_experience": [
+    {
+      "company": "ShopLocal",
+      "title": "Product Manager",
+      "start_date": "2024-01",
+      "end_date": null,
+      "company_size": 200,
+      "company_stage": "Series B",
+      "description": "PM for consumer mobile app with 500K+ installs. Own engagement and retention features.",
+      "key_achievements": [
+        "Launched push notification personalization, increasing 7-day retention by 8%",
+        "Shipped redesigned home feed, improving session length by 15%",
+        "Ran 12 A/B tests on onboarding flow, increasing activation rate from 42% to 58%"
+      ],
+      "skills_used": ["Mobile", "A/B Testing", "Mixpanel", "Figma", "SQL"]
+    },
+    {
+      "company": "RetailCo",
+      "title": "Associate Product Manager",
+      "start_date": "2022-09",
+      "end_date": "2023-12",
+      "company_size": 30,
+      "company_stage": "Series A",
+      "description": "APM on e-commerce consumer team. Supported senior PM on checkout and cart features.",
+      "key_achievements": [
+        "Reduced checkout abandonment by 12% through streamlined payment flow",
+        "Defined user stories and acceptance criteria for 2 quarterly releases",
+        "Conducted 20+ customer interviews to inform cart redesign"
+      ],
+      "skills_used": ["User Research", "Agile", "Google Analytics", "Figma"]
+    }
+  ]
+}

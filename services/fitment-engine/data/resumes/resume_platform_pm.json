@@ -1,0 +1,60 @@
+{
+  "resume_id": "resume_platform_pm",
+  "name": "Platform PM",
+  "role_type": "platform",
+  "version": 1,
+  "last_used": "2026-04-15",
+  "skills": [
+    "Product Strategy", "API Design", "Developer Experience", "Platform Roadmapping",
+    "Agile/Scrum", "SQL", "Python", "Data Analysis", "Stakeholder Management",
+    "Technical Specifications", "OKRs", "User Research"
+  ],
+  "work_experience": [
+    {
+      "company": "DataFlow Inc.",
+      "title": "Senior Product Manager, Platform",
+      "start_date": "2022-03",
+      "end_date": null,
+      "company_size": 350,
+      "company_stage": "Series C",
+      "description": "Own the developer platform and API product suite used by 1,200+ enterprise customers. Lead a cross-functional team of 8 engineers and 2 designers.",
+      "key_achievements": [
+        "Rebuilt versioned REST API platform, reducing developer onboarding from 2 weeks to 3 days",
+        "Increased API adoption rate by 60% YoY through self-serve documentation and sandbox environments",
+        "Reduced developer support ticket volume by 35% through improved error messaging and documentation",
+        "Launched webhook infrastructure handling 2M+ daily events with 99.97% delivery reliability"
+      ],
+      "skills_used": ["API Design", "Developer Experience", "Technical Specifications", "SQL", "Amplitude"]
+    },
+    {
+      "company": "BuildKit",
+      "title": "Product Manager",
+      "start_date": "2019-06",
+      "end_date": "2022-02",
+      "company_size": 80,
+      "company_stage": "Series A",
+      "description": "First PM hire at a developer tooling startup. Built 0-to-1 self-serve onboarding and core product features alongside founding engineering team.",
+      "key_achievements": [
+        "Led 0-to-1 launch of self-serve onboarding flow, reducing time-to-value from 14 days to 3",
+        "Drove 40% activation lift within 90 days of onboarding redesign",
+        "Defined and shipped 3 major platform features contributing to $8M Series A close",
+        "Established first user research program, running 12+ discovery interviews per quarter"
+      ],
+      "skills_used": ["Product Strategy", "User Research", "Agile/Scrum", "Python", "Looker"]
+    },
+    {
+      "company": "Accenture",
+      "title": "Software Engineer",
+      "start_date": "2017-08",
+      "end_date": "2019-05",
+      "company_size": 500000,
+      "company_stage": "public",
+      "description": "Full-stack engineer on enterprise SaaS platform team. Transitioned into APM role before leaving to join BuildKit.",
+      "key_achievements": [
+        "Developed REST API integrations for 3 Fortune 500 clients",
+        "Reduced average API response time by 40% through query optimization"
+      ],
+      "skills_used": ["Python", "SQL", "JavaScript", "REST APIs"]
+    }
+  ]
+}
