@@ -198,3 +198,16 @@ class ScoreRequest(BaseModel):
 class OverrideRequest(BaseModel):
     action: str     # 'applied_anyway', 'skipped_anyway'
     note: Optional[str] = None
+
+
+class TokenUsage(BaseModel):
+    input_tokens: int
+    output_tokens: int
+    cache_creation_input_tokens: int = 0
+    cache_read_input_tokens: int = 0
+    estimated_cost_usd: float           # approximate; based on Haiku pricing at time of build
+
+
+class AssessmentResponse(BaseModel):
+    assessment: FitAssessment
+    token_usage: TokenUsage

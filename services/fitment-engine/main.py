@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, HTTPException
-from schemas import ScoreRequest, FitAssessment, OverrideRequest
+from schemas import ScoreRequest, FitAssessment, OverrideRequest, AssessmentResponse
 from scorer import score_job
 from storage import save_assessment, get_assessment, list_assessments
 from prompts import PROMPT_VERSION
@@ -10,13 +10,13 @@ from prompts import PROMPT_VERSION
 app = FastAPI(title='Fitment Engine', version='1.0')
 
 
-@app.post('/assess', response_model=FitAssessment)
+@app.post('/assess', response_model=AssessmentResponse)
 async def assess(request: ScoreRequest):
     try:
-        result = score_job(request)
+        assessment, token_usage = score_job(request)
         if request.save_result:
-            save_assessment(result)
-        return result
+            save_assessment(assessment)
+        return AssessmentResponse(assessment=assessment, token_usage=token_usage)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

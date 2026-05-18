@@ -17,7 +17,7 @@ os.environ['STORAGE_PATH'] = _tmp_storage
 
 from fastapi.testclient import TestClient
 from main import app
-from schemas import FitAssessment, EligibilityGate
+from schemas import FitAssessment, EligibilityGate, TokenUsage
 
 client = TestClient(app)
 
@@ -59,6 +59,16 @@ def _mock_assessment():
     )
 
 
+def _mock_usage():
+    return TokenUsage(
+        input_tokens=2800,
+        output_tokens=620,
+        cache_creation_input_tokens=700,
+        cache_read_input_tokens=0,
+        estimated_cost_usd=0.004940,
+    )
+
+
 # ── /health ────────────────────────────────────────────────────────────────────
 
 def test_health():
@@ -73,13 +83,14 @@ def test_health():
 
 def test_assess_returns_assessment():
     payload = _make_request_payload()
-    with patch('main.score_job', return_value=_mock_assessment()):
+    with patch('main.score_job', return_value=(_mock_assessment(), _mock_usage())):
         resp = client.post('/assess', json=payload)
     assert resp.status_code == 200
     data = resp.json()
-    assert data['score'] == 88
-    assert data['action_tier'] == 'light_tailoring'
-    assert data['profile_id'] == 'profile_senior_pm'
+    assert data['assessment']['score'] == 88
+    assert data['assessment']['action_tier'] == 'light_tailoring'
+    assert data['assessment']['profile_id'] == 'profile_senior_pm'
+    assert data['token_usage']['input_tokens'] == 2800
 
 
 def test_assess_returns_500_on_llm_failure():
@@ -93,8 +104,7 @@ def test_assess_returns_500_on_llm_failure():
 def test_assess_saves_result_when_requested():
     payload = _make_request_payload()
     payload['save_result'] = True
-    mock_result = _mock_assessment()
-    with patch('main.score_job', return_value=mock_result):
+    with patch('main.score_job', return_value=(_mock_assessment(), _mock_usage())):
         resp = client.post('/assess', json=payload)
     assert resp.status_code == 200
     saved = list(Path(_tmp_storage).glob('*.json'))
@@ -104,7 +114,7 @@ def test_assess_saves_result_when_requested():
 def test_assess_does_not_save_when_not_requested():
     payload = _make_request_payload()
     payload['save_result'] = False
-    with patch('main.score_job', return_value=_mock_assessment()):
+    with patch('main.score_job', return_value=(_mock_assessment(), _mock_usage())):
         resp = client.post('/assess', json=payload)
     assert resp.status_code == 200
     saved = list(Path(_tmp_storage).glob('*.json'))
@@ -122,7 +132,7 @@ def test_list_assessments_empty():
 def test_list_assessments_returns_saved():
     payload = _make_request_payload()
     payload['save_result'] = True
-    with patch('main.score_job', return_value=_mock_assessment()):
+    with patch('main.score_job', return_value=(_mock_assessment(), _mock_usage())):
         client.post('/assess', json=payload)
     resp = client.get('/assessments')
     assert resp.status_code == 200
@@ -140,7 +150,7 @@ def test_get_assessment_found():
     payload = _make_request_payload()
     payload['save_result'] = True
     mock = _mock_assessment()
-    with patch('main.score_job', return_value=mock):
+    with patch('main.score_job', return_value=(mock, _mock_usage())):
         client.post('/assess', json=payload)
     resp = client.get(f'/assessments/{mock.assessment_id}')
     assert resp.status_code == 200
@@ -158,7 +168,7 @@ def test_override_logs_action():
     payload = _make_request_payload()
     payload['save_result'] = True
     mock = _mock_assessment()
-    with patch('main.score_job', return_value=mock):
+    with patch('main.score_job', return_value=(mock, _mock_usage())):
         client.post('/assess', json=payload)
     resp = client.post(
         f'/assessments/{mock.assessment_id}/override',
