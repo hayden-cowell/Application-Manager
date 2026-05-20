@@ -90,7 +90,7 @@ httpx>=0.27.0
 ```
 # .env.example
 ANTHROPIC_API_KEY=your_key_here
-MODEL=claude-sonnet-4-20250514
+MODEL=claude-sonnet-4-6
 PROMPT_VERSION=2.0
 STORAGE_PATH=data/assessments
 ```
@@ -470,7 +470,7 @@ For executive roles (Director/VP/C-level explicitly required), career stage is t
 
 ### Model selection
 
-**Use `claude-sonnet-4-20250514` for all scoring calls.** Haiku was evaluated but rejected for two reasons:
+**Use `claude-sonnet-4-6` for all scoring calls.** Haiku was evaluated but rejected for two reasons:
 
 1. Haiku's minimum cacheable token count is 4,096 tokens. The system prompt + profile context does not reliably clear this threshold, making caching unreliable.
 2. Scoring quality on nuanced competitiveness assessments is meaningfully better on Sonnet. Haiku showed a pattern of routing domain gaps (PLG, pricing, ARR scale) to the eligibility gate despite explicit instructions not to -- this was resolved on Sonnet.
