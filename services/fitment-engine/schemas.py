@@ -23,44 +23,44 @@ class UserProfile(BaseModel):
     current_level: str
     highest_level_held: str
     leveling_trajectory: str
-    has_management_experience: bool
+    has_management_experience: Optional[bool] = None
     years_managing: Optional[int] = None
     largest_team_managed: Optional[int] = None
-    has_director_or_above_experience: bool
+    has_director_or_above_experience: Optional[bool] = None
 
     # Domain and industry depth
     primary_domain: str
     secondary_domains: list[str] = []
     domain_years: dict[str, int]
     worked_at_company_stages: list[str]
-    has_enterprise_experience: bool
-    has_smb_experience: bool
-    has_consumer_experience: bool
-    has_0_to_1_experience: bool
-    has_scaling_experience: bool
-    has_platform_product_experience: bool
-    has_growth_experience: bool
+    has_enterprise_experience: Optional[bool] = None
+    has_smb_experience: Optional[bool] = None
+    has_consumer_experience: Optional[bool] = None
+    has_0_to_1_experience: Optional[bool] = None
+    has_scaling_experience: Optional[bool] = None
+    has_platform_product_experience: Optional[bool] = None
+    has_growth_experience: Optional[bool] = None
 
     # Technical depth
-    can_read_code: bool
-    can_write_code: bool
+    can_read_code: Optional[bool] = None
+    can_write_code: Optional[bool] = None
     coding_languages: list[str] = []
     technical_background: Optional[str] = None
-    comfortable_with_data: bool
+    comfortable_with_data: Optional[bool] = None
     data_tools: list[str] = []
-    has_worked_embedded_with_engineering: bool
-    has_written_technical_specs: bool
+    has_worked_embedded_with_engineering: Optional[bool] = None
+    has_written_technical_specs: Optional[bool] = None
     familiarity_with_apis: str             # 'none', 'low', 'medium', 'high'
 
     # Product craft
     product_areas: list[str] = []
-    strong_in_discovery: bool
-    strong_in_delivery: bool
-    strong_in_strategy: bool
-    strong_in_growth: bool
-    has_pricing_experience: bool
-    has_internationalization_experience: bool
-    has_launched_products: bool
+    strong_in_discovery: Optional[bool] = None
+    strong_in_delivery: Optional[bool] = None
+    strong_in_strategy: Optional[bool] = None
+    strong_in_growth: Optional[bool] = None
+    has_pricing_experience: Optional[bool] = None
+    has_internationalization_experience: Optional[bool] = None
+    has_launched_products: Optional[bool] = None
     notable_launches: list[NotableLaunch] = []
     design_collaboration_depth: str        # 'low', 'medium', 'high'
     research_experience: str               # 'none', 'low', 'moderate', 'high'
@@ -69,24 +69,25 @@ class UserProfile(BaseModel):
     largest_company_size: Optional[int] = None
     smallest_company_size: Optional[int] = None
     largest_arr_supported: Optional[str] = None
+    largest_arr_supported_context: Optional[str] = None
     largest_dau_supported: Optional[int] = None
-    has_owned_revenue_metric: bool
-    has_owned_retention_metric: bool
+    has_owned_revenue_metric: Optional[bool] = None
+    has_owned_retention_metric: Optional[bool] = None
     cross_functional_scope: list[str] = []
-    has_worked_with_sales: bool
-    has_worked_with_legal_compliance: bool
-    budget_ownership: bool
-    vendor_management: bool
+    has_worked_with_sales: Optional[bool] = None
+    has_worked_with_legal_compliance: Optional[bool] = None
+    budget_ownership: Optional[bool] = None
+    vendor_management: Optional[bool] = None
 
     # Credentials and education
     highest_degree: Optional[str] = None
     degree_field: Optional[str] = None
     university_tier: Optional[str] = None
-    has_mba: bool = False
+    has_mba: Optional[bool] = None
     certifications: list[str] = []
-    has_published_work: bool = False
-    has_conference_speaking: bool = False
-    has_notable_side_projects: bool = False
+    has_published_work: Optional[bool] = None
+    has_conference_speaking: Optional[bool] = None
+    has_notable_side_projects: Optional[bool] = None
 
     # Work authorization
     country: str
@@ -99,7 +100,7 @@ class UserProfile(BaseModel):
     # Soft signals
     communication_artifacts: list[str] = []
     stakeholder_management_level: Optional[str] = None
-    has_exec_exposure: bool
+    has_exec_exposure: Optional[bool] = None
     presentation_experience: Optional[str] = None
     written_communication_strength: str   # 'low', 'medium', 'high'
     self_assessed_strengths: list[str] = []
@@ -171,7 +172,7 @@ class FitAssessment(BaseModel):
 
     # Final output
     score: int                            # 0-100 composite
-    action_tier: str                      # 'skip', 'apply', 'light_tailoring', 'strong_fit'
+    action_tier: str                      # 'skip', 'apply_as_is', 'apply', 'light_tailoring', 'strong_fit'
     recommended_resume_id: Optional[str] = None
 
     # Explanation

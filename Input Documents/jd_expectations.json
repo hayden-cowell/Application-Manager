@@ -1,0 +1,394 @@
+{
+  "version": "1.0",
+  "description": "Test expectations for JD test suite. Describes JD characteristics and expected scoring engine behaviors. Not tied to specific profiles -- expectations describe what a well-calibrated engine should do regardless of candidate.",
+  "jobs": [
+    {
+      "job_id": "job_agency_ecommerce_pm",
+      "category_tags": [
+        "domain_mismatch",
+        "jd_quality_medium",
+        "title_inflation",
+        "recruiter_posted",
+        "client_facing"
+      ],
+      "stated_min_years": 3,
+      "work_arrangement": "remote",
+      "requires_sponsorship": false,
+      "requires_onsite": false,
+      "domain": "agency_ecommerce",
+      "jd_quality": "medium",
+      "expected_eligibility_for_us_remote_candidate": "pass",
+      "expected_confidence": "medium",
+      "test_purpose": "Domain mismatch and JD quality test. A technically eligible candidate with no ecommerce or agency background should score low due to domain mismatch, not eligibility failure. Tests whether the engine correctly routes domain gaps to competitiveness rather than the eligibility gate.",
+      "good_fit_profile_characteristics": [
+        "3+ years PM experience",
+        "Agency or ecommerce background",
+        "Shopify ecosystem familiarity",
+        "Client-facing product leadership experience",
+        "A/B testing and CRO experience"
+      ],
+      "watch_for": [
+        "MUST HAVE language on A/B testing should route to competitiveness not eligibility",
+        "Title inconsistency between header (Product Manager) and body (Senior Product Manager) -- model should use body title for seniority assessment",
+        "Recruiter boilerplate and EEO text should be ignored -- requirements extracted from actual job content only",
+        "Confidence should be medium due to thin company context and no ARR or stage signal"
+      ],
+      "must_not_happen": [
+        "Eligibility failure based on A/B testing or strategy gaps",
+        "High score for candidates with no ecommerce or agency background",
+        "Confidence set to high given sparse company context"
+      ]
+    },
+    {
+      "job_id": "job_internal_ai_pm",
+      "category_tags": [
+        "domain_mismatch",
+        "internal_tooling",
+        "ambiguous_work_arrangement",
+        "niche_domain",
+        "consumer_brand"
+      ],
+      "stated_min_years": 5,
+      "work_arrangement": "ambiguous",
+      "requires_sponsorship": false,
+      "requires_onsite": null,
+      "domain": "internal_ai_tools_consumer_brand",
+      "jd_quality": "medium",
+      "expected_eligibility_for_us_remote_candidate": "ambiguous",
+      "expected_confidence": "medium",
+      "test_purpose": "Ambiguous work arrangement and niche domain test. Role is internal AI tooling at a consumer footwear brand with no explicit remote option -- location inference required. Tests confidence behavior when work arrangement is unstated and domain is highly specific.",
+      "good_fit_profile_characteristics": [
+        "5+ years PM experience",
+        "Enterprise AI tool deployment or governance experience",
+        "Change management at scale",
+        "Cross-functional stakeholder leadership",
+        "Familiarity with responsible AI practices"
+      ],
+      "watch_for": [
+        "Work arrangement is never stated -- model should note this ambiguity and reduce confidence accordingly",
+        "Portland, OR location mentioned in company description -- model should not infer this means the role is onsite without explicit confirmation",
+        "AI governance and responsible AI are core requirements not nice-to-haves despite soft language",
+        "JD contains a grammatical error (This role will leads) -- model should not be distracted by it",
+        "Confidence should drop due to unclear work arrangement"
+      ],
+      "must_not_happen": [
+        "High confidence given ambiguous work arrangement",
+        "Eligibility pass assumed without flagging work arrangement uncertainty",
+        "AI governance treated as a nice-to-have"
+      ]
+    },
+    {
+      "job_id": "job_principal_pm_betterhelp",
+      "category_tags": [
+        "b2c_required",
+        "high_seniority",
+        "gen_ai_required",
+        "marketplace",
+        "healthtech",
+        "travel_required"
+      ],
+      "stated_min_years": 7,
+      "work_arrangement": "remote_with_travel",
+      "requires_sponsorship": false,
+      "requires_onsite": false,
+      "domain": "b2c_healthtech_marketplace",
+      "jd_quality": "high",
+      "expected_eligibility_for_us_remote_candidate": "pass",
+      "expected_confidence": "high",
+      "test_purpose": "B2C domain requirement and generative AI experience test. Role explicitly requires 7+ years at a B2C company -- B2B experience does not satisfy this. Tests whether the engine correctly identifies domain-specific experience requirements vs. general PM experience. Also tests gen AI product experience as a relatively new skill type.",
+      "good_fit_profile_characteristics": [
+        "7+ years PM experience specifically at B2C companies",
+        "Generative AI feature development and launch experience",
+        "Growth and experimentation mindset with measurable execution",
+        "SQL and BI tool proficiency",
+        "Consumer product lifecycle ownership",
+        "Marketplace platform experience a plus"
+      ],
+      "watch_for": [
+        "7+ years requirement is B2C-specific -- B2B-only experience should reduce competitiveness score even if total years exceed the minimum",
+        "Quarterly travel to San Jose should be noted but not treated as an onsite requirement",
+        "Gen AI product experience is a hard requirement not a nice-to-have despite being listed under qualifications",
+        "Principal level implies higher seniority bar than Senior PM -- competitiveness should reflect this",
+        "Clinical documentation domain knowledge should be treated as a nice-to-have not a gate"
+      ],
+      "must_not_happen": [
+        "B2B-only experience treated as equivalent to B2C experience for the 7-year requirement",
+        "Travel requirement triggering an onsite eligibility failure",
+        "Gen AI product experience ignored as a scoring signal"
+      ]
+    },
+    {
+      "job_id": "job_pm_workos",
+      "category_tags": [
+        "strong_fit_baseline",
+        "well_written_jd",
+        "developer_tools",
+        "b2b_saas",
+        "no_stated_min_years",
+        "travel_required"
+      ],
+      "stated_min_years": null,
+      "work_arrangement": "remote_with_monthly_travel",
+      "requires_sponsorship": false,
+      "requires_onsite": false,
+      "domain": "developer_tools_auth_identity_b2b_saas",
+      "jd_quality": "high",
+      "expected_eligibility_for_us_remote_candidate": "pass",
+      "expected_confidence": "high",
+      "test_purpose": "Strong fit baseline and well-written JD reference. No stated minimum years -- tests eligibility gate fallback behavior. Clean must-have vs. nice-to-have separation tests whether the engine correctly weights requirements. A candidate with strong B2B SaaS platform and developer tools background should score high. Use as the consistency benchmark -- run this JD across all profiles and track score variance.",
+      "good_fit_profile_characteristics": [
+        "B2B SaaS experience with developer or enterprise buyer understanding",
+        "Developer-facing product experience (APIs, SDKs, platform)",
+        "0-to-1 product experience",
+        "Strong cross-functional collaboration track record",
+        "Bias to action and fast iteration mindset"
+      ],
+      "watch_for": [
+        "No stated minimum years -- eligibility gate should skip the years check and pass automatically",
+        "Monthly travel should not trigger onsite eligibility failure",
+        "Pricing and PLG are explicitly listed as nice-to-haves -- should not reduce competitiveness significantly",
+        "Auth and identity domain knowledge is one path to strong fit but developer-facing product experience is listed as an alternative -- model should recognize the OR condition",
+        "JD quality is high -- confidence should reflect clear requirements and good signal"
+      ],
+      "must_not_happen": [
+        "Eligibility failure due to missing stated minimum years",
+        "Monthly travel triggering onsite failure",
+        "Pricing and PLG gaps treated as major competitiveness detractors given their nice-to-have status"
+      ]
+    },
+    {
+      "job_id": "job_tpm_cloud_platform",
+      "category_tags": [
+        "vague_jd",
+        "adjacent_role",
+        "onsite",
+        "technical_requirements",
+        "low_company_context"
+      ],
+      "stated_min_years": 5,
+      "work_arrangement": "onsite",
+      "requires_sponsorship": false,
+      "requires_onsite": true,
+      "domain": "cloud_platform_devops",
+      "jd_quality": "low",
+      "expected_eligibility_for_us_remote_candidate": "pass",
+      "expected_confidence": "medium",
+      "test_purpose": "Vague JD and onsite eligibility test. Role is onsite in Beaverton, OR. Eligibility outcome is profile-specific: remote-only candidates fail; candidates who accept onsite or hybrid work (like Hayden) correctly pass — this is not a gate bug. Tests confidence behavior on sparse JDs with no company context, no ARR, no stage signal, and generic responsibilities. Also tests whether TPM title and technical depth requirements (Terraform, Kubernetes, cloud) are correctly weighted.",
+      "good_fit_profile_characteristics": [
+        "5+ years driving platform or cloud products",
+        "DevOps and cloud-native background",
+        "Hands-on AWS, GCP, or Azure experience",
+        "Infrastructure as Code familiarity (Terraform, Kubernetes)",
+        "Onsite availability in Beaverton, OR"
+      ],
+      "watch_for": [
+        "Onsite requirement should trigger eligibility failure for remote-only candidates regardless of other qualifications",
+        "Confidence should be low given no company context, no ARR, no stage, no team size, and vague responsibilities",
+        "5+ years requirement is ambiguous -- unclear if PM experience only or any product development experience counts",
+        "TPM title is adjacent to PM -- model should note the role type distinction",
+        "Sparse JD should surface in confidence_reasons not just confidence_level"
+      ],
+      "must_not_happen": [
+        "Eligibility pass for remote-only candidates",
+        "High confidence given sparse JD",
+        "Technical requirements (Terraform, Kubernetes) treated as eligibility gates rather than competitiveness signals"
+      ]
+    },
+    {
+      "job_id": "job_pm_hg_insights",
+      "category_tags": [
+        "requirement_bloat",
+        "domain_mismatch",
+        "boundary_eligibility",
+        "gtm_intelligence",
+        "no_work_arrangement"
+      ],
+      "stated_min_years": 10,
+      "work_arrangement": "unknown",
+      "requires_sponsorship": false,
+      "requires_onsite": null,
+      "domain": "b2b_gtm_intelligence_revenue_ops",
+      "jd_quality": "medium",
+      "expected_eligibility_for_us_remote_candidate": "ambiguous",
+      "expected_confidence": "medium",
+      "test_purpose": "Requirement bloat and boundary eligibility test. 10+ year minimum puts candidates with 7-9 years right at the edge of the sliding scale. Long requirements list mixes core responsibilities with generic PM skills -- tests whether the engine distinguishes signal from noise. GTM intelligence stack (6sense, ZoomInfo, Demandbase) is highly domain-specific. Work arrangement is never stated.",
+      "good_fit_profile_characteristics": [
+        "10+ years PM experience",
+        "Revenue-generating product experience (Sales, Marketing, CS tools)",
+        "Platform product with integration ecosystem experience",
+        "AI product lifecycle ownership",
+        "Deep B2B GTM intelligence stack familiarity (6sense, ZoomInfo, Demandbase, Bombora)",
+        "Early stage venture-backed company experience"
+      ],
+      "watch_for": [
+        "Work arrangement is completely absent -- model should flag this and reduce confidence",
+        "10+ year minimum puts 9-year candidates in the 1-year gap sliding scale zone -- should pass eligibility with a minor competitiveness penalty not a hard failure",
+        "GTM intelligence stack knowledge is a differentiating domain requirement -- candidates without it should score lower on competitiveness",
+        "Long requirements list contains many generic PM skills that should not be weighted equally to domain-specific ones",
+        "AI product lifecycle is listed as a requirement not a nice-to-have despite appearing mid-list"
+      ],
+      "must_not_happen": [
+        "Hard eligibility failure for candidates with 9 years experience against the 10-year minimum",
+        "High confidence given absent work arrangement information",
+        "Generic PM skills (communication, analytical thinking) weighted equally to domain-specific requirements"
+      ]
+    },
+    {
+      "job_id": "job_sr_pm_autodesk_access",
+      "category_tags": [
+        "boundary_eligibility",
+        "ambiguous_work_arrangement",
+        "platform_pm",
+        "large_enterprise",
+        "high_scope"
+      ],
+      "stated_min_years": 8,
+      "work_arrangement": "hybrid_location_unknown",
+      "requires_sponsorship": false,
+      "requires_onsite": null,
+      "domain": "platform_licensing_api_monetization",
+      "jd_quality": "high",
+      "expected_eligibility_for_us_remote_candidate": "ambiguous",
+      "expected_confidence": "medium",
+      "test_purpose": "Boundary eligibility and ambiguous work arrangement test. 8-year minimum creates a tight boundary for candidates with 7-9 years. Hybrid requirement with no stated location -- Autodesk HQ is San Francisco but role location is unstated. Tests whether the model correctly surfaces location ambiguity rather than assuming pass or fail. High-scope enterprise role at $10B revenue trajectory company tests whether scale context affects competitiveness scoring.",
+      "good_fit_profile_characteristics": [
+        "8+ years PM experience with at least 3 years on platform products",
+        "Platform strategy and roadmap ownership experience",
+        "Cross-functional stakeholder leadership including engineering and executive audiences",
+        "API monetization or licensing product experience",
+        "AI tool familiarity and curiosity",
+        "Ability to operate at enterprise scale"
+      ],
+      "watch_for": [
+        "Hybrid requirement with no location specified -- model should flag ambiguity rather than assuming pass or fail",
+        "8-year minimum is a tight boundary -- candidates with 7 years should pass with minor penalty, candidates with 6 should pass with meaningful penalty, candidates with 5 should approach the hard gate",
+        "API and MCP monetization is specialized -- should be weighted as a domain differentiator",
+        "Executive visibility and storytelling to senior leadership is an explicit requirement not a soft skill",
+        "Alternative qualification path (8+ years in engineering, data, design with some PM experience) should be recognized and considered"
+      ],
+      "must_not_happen": [
+        "Hard eligibility failure for candidates within 1-2 years of the 8-year minimum",
+        "Work arrangement assumed to be remote-friendly without flagging the ambiguity",
+        "Alternative qualification paths ignored"
+      ]
+    },
+    {
+      "job_id": "job_sr_manager_pm_comscore",
+      "category_tags": [
+        "domain_mismatch",
+        "adjacent_role",
+        "technical_depth_required",
+        "ad_tech",
+        "title_mismatch",
+        "explicit_no_sponsorship"
+      ],
+      "stated_min_years": 5,
+      "work_arrangement": "hybrid_or_remote",
+      "requires_sponsorship": false,
+      "requires_onsite": false,
+      "domain": "ad_tech_audience_measurement_data_integrations",
+      "jd_quality": "high",
+      "expected_eligibility_for_us_remote_candidate": "pass",
+      "expected_confidence": "high",
+      "test_purpose": "Domain mismatch and title interpretation test. Senior Manager title implies people management but job description contains no people management responsibilities -- tests whether model correctly interprets actual role level from responsibilities rather than title. Ad tech and audience measurement domain is highly specific. Hands-on SQL and Snowflake requirement is stronger than typical PM data fluency -- tests whether model distinguishes between data-fluent PM and deep SQL ownership.",
+      "good_fit_profile_characteristics": [
+        "5+ years PM experience with data-heavy or technical product ownership",
+        "Ad tech, media, or audience measurement domain experience",
+        "Strong hands-on SQL skills including Snowflake",
+        "Experience defining data contracts, schemas, and versioning",
+        "External partner technical relationship management",
+        "Agency holdco or sell-side distributor familiarity"
+      ],
+      "watch_for": [
+        "Senior Manager title does not imply people management in this JD -- model should not penalize candidates for lacking management experience",
+        "Snowflake and hands-on SQL is explicitly required at a deep level -- comfortable_with_data is not sufficient if it does not include warehouse-level query ownership",
+        "No sponsorship requirement is prominent and explicit -- should trigger eligibility failure for candidates requiring sponsorship",
+        "Remote is explicitly offered alongside hybrid city options -- should not flag work arrangement as ambiguous",
+        "Ad tech domain is specific enough that general B2B SaaS experience should not be treated as equivalent"
+      ],
+      "must_not_happen": [
+        "People management experience treated as a requirement based on Senior Manager title",
+        "General data fluency treated as equivalent to hands-on Snowflake SQL ownership",
+        "Eligibility pass for candidates requiring visa sponsorship",
+        "Ad tech domain gap ignored in competitiveness scoring"
+      ]
+    },
+    {
+      "job_id": "job_pm_edmunds_adtech",
+      "category_tags": [
+        "overqualified_test",
+        "low_bar",
+        "mid_level",
+        "domain_mismatch",
+        "automotive_adtech",
+        "no_work_arrangement"
+      ],
+      "stated_min_years": 2,
+      "work_arrangement": "unknown",
+      "requires_sponsorship": false,
+      "requires_onsite": null,
+      "domain": "automotive_digital_advertising",
+      "jd_quality": "medium",
+      "expected_eligibility_for_us_remote_candidate": "ambiguous",
+      "expected_confidence": "medium",
+      "test_purpose": "Overqualification and low-bar eligibility test. 2-year minimum with mid-level responsibilities and $111-141k comp range. Tests whether the scoring engine surfaces any signal about candidate-to-role seniority mismatch, or whether it simply scores high on eligibility and competitiveness for an overqualified candidate. Also tests domain mismatch handling for automotive ad tech. Work arrangement is never stated.",
+      "good_fit_profile_characteristics": [
+        "2-4 years PM experience",
+        "Digital advertising or ad tech interest or background",
+        "Client reporting and dashboard experience",
+        "SQL and data visualization familiarity",
+        "Online analytics platform familiarity (Google Analytics, Adobe)",
+        "Automotive industry interest a plus"
+      ],
+      "watch_for": [
+        "Work arrangement is completely absent -- model should flag and reduce confidence",
+        "A highly experienced candidate should score high on eligibility and competitiveness but the engine currently has no overqualification concept -- note whether any signal surfaces in reasoning",
+        "Comp range ($111-141k) signals mid-level -- observe whether model uses comp context to infer seniority expectations",
+        "Automotive ad tech is a niche domain -- general PM experience should not score as highly as domain-matched candidates",
+        "A/B testing is listed as a responsibility not a requirement -- weighting should reflect this"
+      ],
+      "must_not_happen": [
+        "Eligibility failure for candidates exceeding the 2-year minimum",
+        "High confidence given absent work arrangement",
+        "Automotive ad tech domain treated as equivalent to general B2B SaaS for competitiveness scoring"
+      ]
+    },
+    {
+        "job_id": "job_lead_pm_panorama_platform",
+        "category_tags": ["strong_fit_candidate_validated", "platform_pm", "edtech", "remote", "security_compliance", "developer_experience"],
+        "stated_min_years": 8,
+        "work_arrangement": "remote",
+        "requires_sponsorship": false,
+        "requires_onsite": false,
+        "domain": "edtech_platform_infrastructure",
+        "jd_quality": "high",
+        "expected_eligibility_for_us_remote_candidate": "pass",
+        "expected_confidence": "high",
+        "test_purpose": "Real-world strong fit validation. Candidate received interview and completed 4 rounds for this role when the stated minimum was 3-5 years. Current JD shows 8+ years. Engine should score this in apply or tailor tier reflecting strong domain alignment across platform PM, observability, data infrastructure, API design, technical depth, and cross-functional engineering leadership. If this scores skip, the calibration is wrong. Use as the primary ground truth benchmark for the candidate's profile.",
+        "real_world_context": "Candidate applied when stated minimum was 3-5 years. Current JD updated to 8+. Scoring against the 8-year bar will likely penalize tenure. The meaningful test is whether domain alignment, technical credibility, and observability/platform work surface correctly as strong signals despite the experience gap.",
+        "good_fit_profile_characteristics": [
+            "Platform PM with data infrastructure and observability depth",
+            "Strong technical credibility -- can engage with staff engineers",
+            "AWS, GCP, Snowflake exposure",
+            "Cross-functional alignment and executive communication track record",
+            "Developer tooling and internal platform experience",
+            "Security and compliance adjacent experience a plus",
+            "Prior software engineering background strongly preferred"
+        ],
+        "watch_for": [
+            "Domain alignment should surface as unusually strong -- platform, observability, data infrastructure, API design all match directly",
+            "Technical credibility signals (prior integration engineer, can write code, AWS/GCP/Snowflake) should be recognized and weighted positively",
+            "8-year minimum against 3-year PM tenure will trigger a competitiveness penalty -- watch whether the engine applies the tenure-relative gap weighting correctly",
+            "Security and compliance experience is a named requirement but candidate has null on has_worked_with_legal_compliance -- should surface in missing_signals at medium weight not as a disqualifier",
+            "Edtech domain is a mismatch but JD does not treat industry domain as a hard requirement -- should not be penalized heavily",
+            "JD quality is high -- confidence should be high"
+        ],
+        "must_not_happen": [
+            "Eligibility failure",
+            "Score below 60 given real-world interview evidence of fit",
+            "Domain mismatch on edtech treated as a hard disqualifier",
+            "Technical credibility signals ignored or underweighted"
+        ]
+    }
+  ]
+}

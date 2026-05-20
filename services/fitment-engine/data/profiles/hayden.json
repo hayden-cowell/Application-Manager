@@ -1,0 +1,111 @@
+{
+  "profile_id": "profile_hayden_cowell",
+  "profile_version": 1,
+  "onboarding_complete": false,
+
+  "target_roles": ["Product Manager", "Senior Product Manager", "Staff Product Manager"],
+  "target_industries": ["B2B SaaS", "Developer Tools", "Data Infrastructure", "Consumer"],
+  "excluded_industries": [],
+  "work_arrangement": ["remote", "hybrid", "onsite"],
+  "target_company_stages": ["seed", "series_a", "series_b", "series_c", "growth", "public"],
+  "open_to_ic_and_management": false,
+  "job_search_urgency": "active",
+
+  "total_years_experience": 8,
+  "years_in_current_discipline": 3,
+  "current_level": "Product Manager",
+  "highest_level_held": "Product Manager",
+  "leveling_trajectory": "Integration Engineer to PM (promoted within 12 months)",
+  "has_management_experience": false,
+  "years_managing": null,
+  "largest_team_managed": null,
+  "has_director_or_above_experience": false,
+
+  "primary_domain": "B2B SaaS",
+  "secondary_domains": ["Data Infrastructure", "Developer Tools"],
+  "domain_years": {
+    "B2B SaaS": 3,
+    "Data Infrastructure": 3,
+    "Developer Tools": 5
+  },
+  "worked_at_company_stages": ["public"],
+  "has_enterprise_experience": true,
+  "has_smb_experience": false,
+  "has_consumer_experience": false,
+  "has_0_to_1_experience": true,
+  "has_scaling_experience": true,
+  "has_platform_product_experience": true,
+  "has_growth_experience": false,
+  "has_pricing_experience": false,
+
+  "can_read_code": true,
+  "can_write_code": true,
+  "coding_languages": ["JavaScript", "HTML", "CSS", "SQL"],
+  "technical_background": "Front-end developer 2018-2019, Integration Engineer 2021-2023 before transitioning to PM",
+  "comfortable_with_data": true,
+  "data_tools": ["SQL", "Snowflake", "AWS", "GCP", "Salesforce"],
+  "has_worked_embedded_with_engineering": true,
+  "has_written_technical_specs": true,
+  "familiarity_with_apis": "high",
+
+  "product_areas": ["data quality", "observability", "data infrastructure", "internal tooling", "API integrations"],
+  "strong_in_discovery": true,
+  "strong_in_delivery": true,
+  "strong_in_strategy": true,
+  "strong_in_growth": false,
+  "has_internationalization_experience": null,
+  "has_launched_products": true,
+  "notable_launches": [
+    {
+      "description": "Led cross-org initiative with 4 engineering teams to design and launch a new waterfall data model",
+      "impact": "Increased data coverage by 100M+ records, unlocked previously inaccessible data for customer-facing products in under 2 months"
+    },
+    {
+      "description": "Developed observability capabilities across production systems, implementing 14 data pipelines",
+      "impact": "Reduced time-to-detection of critical data issues from weeks to under 24 hours, prevented downstream data quality regressions"
+    },
+    {
+      "description": "Drove improvements to internal data and analytics tooling",
+      "impact": "Increased research productivity by 2.4x year-over-year"
+    }
+  ],
+  "design_collaboration_depth": "medium",
+  "research_experience": "moderate",
+
+  "largest_company_size": 4500,
+  "smallest_company_size": 200,
+  "largest_arr_supported": "$800M+ (platform supporting ZoomInfo core data products)",
+  "largest_arr_supported_context": "platform_pm_not_direct_owner",
+  "largest_dau_supported": null,
+  "has_owned_revenue_metric": false,
+  "has_owned_retention_metric": false,
+  "cross_functional_scope": ["Engineering", "Data Science", "Analytics", "Sales", "Customer Success"],
+  "has_worked_with_sales": true,
+  "has_worked_with_legal_compliance": null,
+  "budget_ownership": false,
+  "vendor_management": null,
+
+  "highest_degree": null,
+  "degree_field": null,
+  "university_tier": null,
+  "has_mba": false,
+  "certifications": [],
+  "has_published_work": false,
+  "has_conference_speaking": false,
+  "has_notable_side_projects": true,
+
+  "country": "US",
+  "work_authorization": "citizen",
+  "requires_sponsorship": false,
+  "willing_to_relocate": true,
+  "current_location": "Portland, OR",
+  "timezone": "PT",
+
+  "communication_artifacts": ["PRDs", "technical specifications", "roadmaps", "data quality metrics frameworks"],
+  "stakeholder_management_level": "VP and above",
+  "has_exec_exposure": true,
+  "presentation_experience": "regular internal including VP and above",
+  "written_communication_strength": "high",
+  "self_assessed_strengths": ["technical depth", "cross-functional alignment", "data-driven prioritization", "engineering partnership", "system-level thinking"],
+  "self_assessed_gaps": ["pricing and packaging", "product-led growth", "consumer products"]
+}

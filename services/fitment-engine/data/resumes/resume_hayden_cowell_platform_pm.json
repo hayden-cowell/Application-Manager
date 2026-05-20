@@ -1,0 +1,60 @@
+{
+  "resume_id": "resume_hayden_cowell_platform_pm",
+  "name": "Platform PM",
+  "role_type": "platform",
+  "version": 1,
+  "last_used": "2026-05-01",
+  "skills": [
+    "Product Strategy", "Platform Product Management", "Data Infrastructure", "Data Quality",
+    "Observability", "API Integrations", "SQL", "Snowflake", "AWS", "GCP",
+    "Cross-functional Leadership", "Technical Specifications", "PRDs", "Roadmapping",
+    "Stakeholder Management", "OKRs", "Discovery", "JavaScript", "HTML", "CSS"
+  ],
+  "work_experience": [
+    {
+      "company": "ZoomInfo",
+      "title": "Product Manager, Data Infrastructure",
+      "start_date": "2023-01",
+      "end_date": null,
+      "company_size": 4500,
+      "company_stage": "public",
+      "description": "Platform PM for ZoomInfo's core data infrastructure, owning data quality, observability, and internal data tooling products that underpin $800M+ ARR in customer-facing products. Collaborate with 4+ engineering teams, data science, analytics, sales, and customer success.",
+      "key_achievements": [
+        "Led cross-org initiative with 4 engineering teams to design and launch a new waterfall data model, increasing data coverage by 100M+ records and unlocking previously inaccessible data for customer-facing products in under 2 months",
+        "Built observability capabilities across production systems by implementing 14 data pipelines, reducing time-to-detection of critical data issues from weeks to under 24 hours and preventing downstream data quality regressions",
+        "Drove improvements to internal data and analytics tooling that increased research team productivity by 2.4x year-over-year",
+        "Defined data quality metrics framework adopted across engineering and analytics as the standard for measuring pipeline health"
+      ],
+      "skills_used": ["SQL", "Snowflake", "AWS", "GCP", "Product Strategy", "Technical Specifications", "PRDs", "Stakeholder Management"]
+    },
+    {
+      "company": "ZoomInfo",
+      "title": "Integration Engineer",
+      "start_date": "2021-06",
+      "end_date": "2022-12",
+      "company_size": 4500,
+      "company_stage": "public",
+      "description": "Embedded on the data platform engineering team, building and maintaining integrations between ZoomInfo's data pipeline systems and third-party data sources. Promoted to PM within 12 months based on cross-functional leadership and product impact.",
+      "key_achievements": [
+        "Designed and implemented API integrations for 6 external data provider partnerships",
+        "Reduced integration failure rate by 40% through improved error handling and monitoring",
+        "Collaborated with PM and engineering leads to scope platform requirements, informing roadmap decisions for data ingestion systems"
+      ],
+      "skills_used": ["JavaScript", "SQL", "AWS", "Salesforce", "API Integrations", "Technical Specifications"]
+    },
+    {
+      "company": "Dealerspike",
+      "title": "Front-End Developer",
+      "start_date": "2018-03",
+      "end_date": "2019-12",
+      "company_size": 200,
+      "company_stage": "growth",
+      "description": "Front-end developer building dealer-facing web applications and internal tooling for an automotive digital marketing platform.",
+      "key_achievements": [
+        "Built and maintained responsive web interfaces for 50+ automotive dealer clients",
+        "Developed internal CMS tooling that reduced content update time from hours to minutes for the operations team"
+      ],
+      "skills_used": ["JavaScript", "HTML", "CSS", "SQL"]
+    }
+  ]
+}
