@@ -12,6 +12,7 @@ __pycache__/
 # Assessment outputs and test results (runtime data)
 services/fitment-engine/data/assessments/
 services/fitment-engine/data/test_results/
+services/fitment-engine/data/ablation_results/
 
 # OS
 .DS_Store
