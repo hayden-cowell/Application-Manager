@@ -117,7 +117,7 @@ REQUIRED OUTPUT SCHEMA:
 
 PROFILE FIELD REFERENCE
 =======================
-Profile fields not present in the candidate context should be assumed false or absent.
+Profile fields not present in the candidate context should be assumed unknown (null) -- do not penalize for absent flags.
 
 Competitiveness fields:
 - total_years_experience: total PM years across all roles

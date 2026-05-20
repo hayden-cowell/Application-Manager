@@ -91,7 +91,7 @@ httpx>=0.27.0
 # .env.example
 ANTHROPIC_API_KEY=your_key_here
 MODEL=claude-sonnet-4-6
-PROMPT_VERSION=2.0
+PROMPT_VERSION=1.2
 STORAGE_PATH=data/assessments
 ```
 
@@ -168,7 +168,7 @@ class UserProfile(BaseModel):
     data_tools: list[str] = []
     has_worked_embedded_with_engineering: Optional[bool] = None
     has_written_technical_specs: Optional[bool] = None
-    familiarity_with_apis: str = None     # 'none', 'low', 'medium', 'high'
+    familiarity_with_apis: Optional[str] = None     # 'none', 'low', 'medium', 'high'
 
     # Product craft
     product_areas: list[str] = []
@@ -381,7 +381,7 @@ def select_best_resume(job, resumes):
 
 ## 5. Eligibility Gate
 
-The eligibility gate runs in Python before any LLM call. If it fails, the assessment costs $0 and returns immediately. The gate checks exactly four conditions -- nothing else.
+The eligibility gate runs in Python before any LLM call. If it fails, the assessment costs $0 and returns immediately. The gate checks five conditions -- nothing else.
 
 ```python
 def apply_eligibility_gate(job: JobPosting, profile: UserProfile) -> dict:
@@ -400,7 +400,8 @@ def apply_eligibility_gate(job: JobPosting, profile: UserProfile) -> dict:
         # Gap of 0-1 years: pass with no penalty
 
     # Check 2: executive role without confirmed leadership experience
-    if requires_executive(job.description):
+    # Checks job.description AND job.title for executive signals
+    if requires_executive(job.description, job.title):
         if profile.has_director_or_above_experience is False:
             failures.append(
                 "Role requires Director/VP-level leadership; "
@@ -409,10 +410,11 @@ def apply_eligibility_gate(job: JobPosting, profile: UserProfile) -> dict:
         # null = unknown; do not fail eligibility on unknown
 
     # Check 3: onsite incompatibility
+    # Checks job.description AND job.location for onsite signals
     # NOTE: willing_to_relocate does NOT bypass this check.
     # Willingness to relocate means the candidate will move cities --
     # it does not mean they accept onsite work arrangements.
-    if requires_onsite(job.description):
+    if requires_onsite(job.description, job.location):
         if ('onsite' not in profile.work_arrangement
                 and 'hybrid' not in profile.work_arrangement):
             failures.append(
@@ -420,16 +422,18 @@ def apply_eligibility_gate(job: JobPosting, profile: UserProfile) -> dict:
                 "preferences do not include onsite or hybrid"
             )
 
-    # Check 4: work authorization
+    # Check 4: sponsorship incompatibility
     if profile.requires_sponsorship and no_sponsorship_offered(job.description):
         failures.append(
             "Role offers no sponsorship; candidate requires it"
         )
-    # International location check (proxy until country-specific auth is in schema)
-    if is_international_onsite(job.description):
+
+    # Check 5: international work authorization
+    # Proxy until country-specific authorization is added to the schema.
+    # Checks job.description AND job.location for non-US location signals.
+    if is_international_onsite(job.description, job.location):
         if profile.work_authorization in ('citizen', 'permanent_resident'):
-            # US citizen/PR cannot work internationally without separate authorization
-            country = extract_job_country(job.description)
+            country = extract_job_country(job.description, job.location)
             failures.append(
                 f"Role requires work authorization in {country}; "
                 f"candidate has US work authorization only"
@@ -718,16 +722,35 @@ Scoring calibration:
 
 ## 7. API Endpoints
 
+### AssessmentResponse (API output wrapper)
+
+The `/assess` endpoint returns an `AssessmentResponse` that wraps the assessment with token usage data. This is useful for cost tracking and debugging without requiring a separate logging layer.
+
+```python
+class TokenUsage(BaseModel):
+    input_tokens: int
+    output_tokens: int
+    cache_write_tokens: int
+    cache_read_tokens: int
+    estimated_cost_usd: float
+
+class AssessmentResponse(BaseModel):
+    assessment: FitAssessment
+    usage: TokenUsage
+```
+
+### Endpoints
+
 ```python
 # main.py
-app = FastAPI(title='Fitment Engine', version='2.0')
+app = FastAPI(title='Fitment Engine', version='1.0')
 
-@app.post('/assess', response_model=FitAssessment)
+@app.post('/assess', response_model=AssessmentResponse)
 async def assess(request: ScoreRequest):
     try:
-        result = score_job(request)
+        result = score_job(request)        # returns AssessmentResponse
         if request.save_result:
-            save_assessment(result)
+            save_assessment(result.assessment)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -805,7 +828,7 @@ python test_runner.py --profile X --job Y              # one profile x one job
 The test runner prints a results table per run and saves a timestamped JSON to `data/test_results/`. Each call logs: score, tier, confidence, input tokens, cache_write tokens, cache_read tokens, output tokens, and estimated cost.
 
 After each run, the runner checks results against `data/test_cases/jd_test_expectations.json` and flags:
-- `must_not_happen` violations (automated)
+- `must_not_happen` violations -- scans full assessment output including `missing_signals`, `reasoning_summary`, `action_tier`, `confidence_level`, and `eligibility.passed` using string matching against each entry in the `must_not_happen` list (automated)
 - `expected_confidence` violations (automated)
 - `expected_eligibility` violations (automated)
 
@@ -856,6 +879,8 @@ After each run, the runner checks results against `data/test_cases/jd_test_expec
 Early versions had the LLM evaluate eligibility as part of the scoring prompt. The model consistently over-applied "non-negotiable" and "required" JD language to skill gaps that belong in competitiveness scoring -- routing PLG ownership, pricing experience, and ARR scale requirements as hard eligibility failures despite explicit instructions not to.
 
 Moving eligibility to Python made it deterministic, testable, and zero-cost on failures. The LLM now only sees candidates who have passed the gate, and the prompt focuses entirely on competitive fit.
+
+The gate currently checks five conditions: years of experience gap, executive role without leadership experience, onsite incompatibility, sponsorship incompatibility, and international work authorization. Helper functions check both `job.description` and `job.location` / `job.title` as appropriate -- relying on description alone missed cases where the location field carried the definitive signal.
 
 ### Why Sonnet instead of Haiku
 
@@ -948,7 +973,7 @@ Build or update in this order when making changes:
 - `temperature=0` on all LLM calls
 - The scoring formula: `round(competitiveness * 0.6 + evidence_strength * 0.4)`
 - The action tier thresholds: skip <60, apply_as_is 60-69, apply 70-79, light_tailoring 80-89, strong_fit 90-100
-- The eligibility gate -- exactly four checks, nothing else
+- The eligibility gate -- five checks only, nothing else; helper functions check both job.description and job.location/job.title as appropriate
 - The three-state boolean compaction logic -- confirmed_true / confirmed_false / null omitted
 
 ### When you are unsure

@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 BASE_URL = 'http://localhost:8000'
-EXPECTATIONS_PATH = Path('../../Input Documents/jd_expectations.json')
+EXPECTATIONS_PATH = Path('data/test_cases/jd_expectations.json')
 RESULTS_DIR = Path('data/test_results')
 
 
@@ -44,6 +44,27 @@ def check_expectations(job_id: str, result: dict, expectations: dict) -> list[st
         violations.append(f'EXPECTED confidence=high but got {actual_conf}')
     if expected_conf == 'low' and actual_conf == 'high':
         violations.append(f'EXPECTED confidence<=medium but got high')
+
+    must_not = exp.get('must_not_happen', [])
+    if must_not:
+        comp = result.get('competitiveness') or {}
+        evid = result.get('evidence_strength') or {}
+        search_text = ' '.join([
+            result.get('reasoning_summary', ''),
+            ' '.join(result.get('missing_signals', [])),
+            ' '.join(result.get('tailoring_suggestions', [])),
+            ' '.join(result.get('confidence_reasons', [])),
+            result.get('action_tier', ''),
+            result.get('confidence_level', ''),
+            str(eligibility.get('passed', '')),
+            ' '.join(comp.get('signals', [])),
+            ' '.join(comp.get('gaps', [])),
+            ' '.join(evid.get('signals', [])),
+            ' '.join(evid.get('gaps', [])),
+        ]).lower()
+        for phrase in must_not:
+            if phrase.lower() in search_text:
+                violations.append(f'MUST_NOT_HAPPEN: "{phrase}"')
 
     return violations
 
