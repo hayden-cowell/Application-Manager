@@ -2,7 +2,7 @@ import json
 from typing import Optional
 from schemas import ScoreRequest, UserProfile, ResumeBaseline
 
-PROMPT_VERSION = '1.2'
+PROMPT_VERSION = '1.3'
 
 SYSTEM_PROMPT = """
 You are a fit scoring engine for a job application tool. Your job is to evaluate
@@ -50,6 +50,28 @@ expectations anywhere in the text, this is missing eligibility-relevant informat
 Set confidence_level to 'medium' at most and include 'Work arrangement not specified
 in JD' in confidence_reasons regardless of how complete the profile is or how clear
 the fit signal is.
+
+SIGNAL RECONCILIATION:
+When confirmed_true/confirmed_false flags and self_assessed_gaps contain
+overlapping information, resolve conflicts as follows:
+
+- confirmed_true takes precedence over self_assessed_gaps. If a skill
+  appears in confirmed_true AND in self_assessed_gaps, treat it as
+  confirmed present. The structured flag is a direct answer to a specific
+  question and overrides a general self-assessment.
+
+- confirmed_false is consistent with self_assessed_gaps. If a skill
+  appears in confirmed_false AND in self_assessed_gaps, treat it as
+  confirmed absent. The self_assessed_gap is corroborating evidence.
+
+- If a skill is absent from both confirmed lists but appears in
+  self_assessed_gaps, treat it as confirmed absent for scoring purposes.
+  The candidate has explicitly identified it as a weakness.
+
+- If a skill is absent from all three sources (confirmed_true,
+  confirmed_false, self_assessed_gaps), treat it as unknown. Do not
+  penalize. Note in missing_signals if the JD strongly requires it and
+  reduce confidence_level to medium accordingly.
 
 CRITICAL RULES:
 - Do not be optimistic. Score for interview likelihood, not for encouragement.

@@ -8,6 +8,13 @@ class NotableLaunch(BaseModel):
 
 
 class UserProfile(BaseModel):
+    # NOTE: self_assessed_gaps must not duplicate fields already captured by confirmed_false
+    # flags. Duplication causes self_assessed_gaps to override the null state of boolean flags,
+    # collapsing null into false and breaking the three-state system for any skill mentioned
+    # in both places. Use self_assessed_gaps only for nuanced gaps that don't map to a boolean
+    # flag (e.g. "executive storytelling", "regulated industry experience"). The profile builder
+    # in Phase 2 should strip self_assessed_gaps entries that duplicate confirmed_false flags.
+
     # Identity and targeting
     target_roles: list[str]
     target_industries: list[str]
@@ -104,6 +111,8 @@ class UserProfile(BaseModel):
     presentation_experience: Optional[str] = None
     written_communication_strength: str   # 'low', 'medium', 'high'
     self_assessed_strengths: list[str] = []
+    # Free-form weaknesses the candidate volunteers. Must not duplicate confirmed_false flags --
+    # use only for nuanced gaps without a direct boolean flag equivalent. See class-level note.
     self_assessed_gaps: list[str] = []
 
     # Metadata

@@ -920,6 +920,14 @@ Early testing showed the model compounding penalties for early-career candidates
 
 The tenure-relative weighting treats confirmed_false gaps as expected or surprising based on career stage. Missing PLG at 3 years is normal; missing it at 9 years is a real gap. This produced meaningfully more accurate scores across test profiles.
 
+### Why self_assessed_gaps must not duplicate confirmed_false flags
+
+Ablation testing revealed that self_assessed_gaps overrides the null state of boolean flags. When a skill appears in self_assessed_gaps, the model treats it as confirmed absent regardless of whether the corresponding flag is null (unknown) or false (confirmed). This collapses null into false and breaks the three-state system for any skill mentioned in both places.
+
+The fix has two parts: a signal reconciliation rule in the system prompt that defines explicit precedence (confirmed_true > confirmed_false = self_assessed_gaps > absent from all sources), and a schema convention that self_assessed_gaps should only contain nuanced gaps that do not map to a boolean flag (e.g. "executive storytelling", "regulated industry experience"). The profile builder in Phase 2 should enforce this by stripping self_assessed_gaps entries that duplicate confirmed_false flags before saving.
+
+The original Hayden profile had "pricing and packaging" and "product-led growth" in self_assessed_gaps despite both being captured by has_pricing_experience: false and has_growth_experience: false. This caused F-N delta = 0 for those flags across all tested jobs, while flags without self_assessed_gaps overlap (has_0_to_1_experience, has_platform_product_experience) showed real non-zero F-N deltas, confirming the diagnosis.
+
 ### Why output length is constrained
 
 Output tokens are the primary cost driver at Sonnet's pricing. Unconstrained reasoning summaries were running 1,100-1,650 tokens per call. Adding length constraints (4 sentences max for reasoning, 5 items max for gaps) reduced output tokens by ~23% with no meaningful loss in assessment quality. Users read the first two sentences of reasoning most of the time anyway.

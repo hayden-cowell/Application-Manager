@@ -260,6 +260,9 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
     print('  Key test: F-N delta (false minus null). If consistently 0, null is being')
     print('  treated as false — the three-state system is not working.')
     print('=' * 80)
+    print('NOTE: self_assessed_gaps cleared in all Category 2 variants to isolate flag')
+    print('      signal from self_assessed_gaps overlap. Production behavior differs when')
+    print('      both signals are present. See ablation findings for details.')
 
     base   = profiles['profile_hayden_cowell']
     resume = [resumes['resume_hayden_cowell_platform_pm']]
@@ -288,7 +291,10 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
 
             row: dict[str, dict] = {}
             for val in (True, False, None):
-                variant = base.model_copy(update={flag: val})
+                variant = base.model_copy(update={
+                    flag: val,
+                    'self_assessed_gaps': [],  # isolate flag signal from self_assessed overlap
+                })
                 r = run_score(job, variant, resume)
                 _add_usage(totals, r)
                 label = 'true' if val is True else ('false' if val is False else 'null')
