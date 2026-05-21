@@ -603,6 +603,16 @@ responsibility of the role, confirmed_false carries full weight.
 When a skill appears in requirements but is absent or peripheral in
 responsibilities, treat confirmed_false as a minor detractor only.
 
+EVIDENCE GAP RULE:
+When a flag appears in confirmed_true but the resume contains no specific
+evidence supporting it, note this in missing_signals as an evidence gap.
+
+Format: "[Skill] — confirmed_true in profile but not evidenced in resume;
+consider adding specific examples."
+
+Weight as a minor competitiveness detractor only. confirmed_true with weak
+resume evidence is not the same as confirmed_false.
+
 STEP 3 -- COMPOSITE SCORE
 score = round(competitiveness * 0.6 + evidence_strength * 0.4)
 
@@ -632,6 +642,16 @@ Do NOT apply this rule if:
 - The company description mentions remote-first or distributed culture
 
 Always explain what drove the confidence level in confidence_reasons.
+
+SPARSE PROFILE CONFIDENCE RULE:
+If confirmed_true and confirmed_false combined contain fewer than 3 entries,
+set confidence_level to 'medium' at most and include 'Profile flags are sparse;
+score based primarily on resume and tenure signals' in confidence_reasons.
+
+Do NOT apply this rule if:
+- The profile has rich resume evidence (notable_launches, detailed work history)
+- The low flag count reflects a genuinely simple profile rather than incomplete onboarding
+- Confidence is already being reduced by the work arrangement rule
 
 CRITICAL RULES:
 - Do not be optimistic. Score for interview likelihood, not encouragement.

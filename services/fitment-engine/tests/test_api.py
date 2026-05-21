@@ -76,7 +76,7 @@ def test_health():
     assert resp.status_code == 200
     data = resp.json()
     assert data['status'] == 'ok'
-    assert data['prompt_version'] == '1.0'
+    assert data['prompt_version'] == '1.4'
 
 
 # ── /assess ────────────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@ import json
 from typing import Optional
 from schemas import ScoreRequest, UserProfile, ResumeBaseline
 
-PROMPT_VERSION = '1.3'
+PROMPT_VERSION = '1.4'
 
 SYSTEM_PROMPT = """
 You are a fit scoring engine for a job application tool. Your job is to evaluate
@@ -29,6 +29,29 @@ Consider:
 - Does the resume tell a coherent story for this type of role?
 Score 0-100.
 
+EVIDENCE GAP RULE:
+When a flag appears in confirmed_true but the resume contains no specific
+evidence supporting it -- no relevant achievements, tools, or role descriptions
+that corroborate the claimed experience -- note this explicitly in
+missing_signals as an evidence gap rather than treating the flag as full
+corroboration.
+
+Format: "[Skill] — confirmed_true in profile but not evidenced in resume;
+consider adding specific examples."
+
+This applies most commonly when:
+- A candidate claims has_platform_product_experience: true but resume shows
+  only consumer or internal tooling work
+- A candidate claims has_growth_experience: true but resume has no
+  experimentation or funnel metrics
+- A candidate claims can_write_code: true but resume has no technical
+  achievements or tool evidence
+
+Weight evidence gaps as minor competitiveness detractors only. The candidate
+has confirmed the experience -- the gap is in resume presentation, not
+necessarily in reality. Do not treat confirmed_true with weak evidence the
+same as confirmed_false.
+
 STEP 3 -- COMPOSITE SCORE
 score = round(competitiveness.score * 0.6 + evidence_strength.score * 0.4)
 
@@ -50,6 +73,21 @@ expectations anywhere in the text, this is missing eligibility-relevant informat
 Set confidence_level to 'medium' at most and include 'Work arrangement not specified
 in JD' in confidence_reasons regardless of how complete the profile is or how clear
 the fit signal is.
+
+SPARSE PROFILE CONFIDENCE RULE:
+If the candidate profile contains fewer confirmed_true or confirmed_false
+flags than confirmed skill signals would justify -- specifically if both
+confirmed_true and confirmed_false are absent or contain fewer than 3 entries
+combined -- set confidence_level to 'medium' at most and include 'Profile
+flags are sparse; score based primarily on resume and tenure signals' in
+confidence_reasons.
+
+Do NOT apply this rule if:
+- The profile has rich resume evidence (notable_launches, work history,
+  detailed product_areas)
+- The low flag count reflects a genuinely simple profile rather than
+  incomplete onboarding
+- Confidence is already being reduced by the work arrangement rule
 
 SIGNAL RECONCILIATION:
 When confirmed_true/confirmed_false flags and self_assessed_gaps contain
