@@ -2,58 +2,59 @@
   "profile_id": "profile_senior_tpm",
   "profile_version": 1,
   "onboarding_complete": true,
-
-  "target_roles": ["Technical Product Manager", "Senior Product Manager", "Staff Product Manager"],
-  "target_industries": ["B2B SaaS", "Developer Tools", "Data Infrastructure"],
+  "target_roles": [
+    "Technical Product Manager",
+    "Senior Product Manager",
+    "Staff Product Manager"
+  ],
+  "target_industries": [
+    "B2B SaaS",
+    "Developer Tools",
+    "Data Infrastructure"
+  ],
   "excluded_industries": [],
-  "work_arrangement": ["remote", "hybrid"],
-  "target_company_stages": ["series_b", "series_c", "growth", "public"],
+  "work_arrangement": [
+    "remote",
+    "hybrid"
+  ],
+  "target_company_stages": [
+    "series_b",
+    "series_c",
+    "growth",
+    "public"
+  ],
   "open_to_ic_and_management": true,
   "job_search_urgency": "active",
-
   "total_years_experience": 13,
   "years_in_current_discipline": 10,
   "current_level": "Technical Product Manager",
   "highest_level_held": "Technical Product Manager",
   "leveling_trajectory": "Business Analyst to Product Owner to Technical PM",
-  "has_management_experience": true,
   "years_managing": 7,
   "largest_team_managed": 50,
-  "has_director_or_above_experience": false,
-
   "primary_domain": "B2B SaaS",
-  "secondary_domains": ["Developer Tools"],
+  "secondary_domains": [
+    "Developer Tools"
+  ],
   "domain_years": {
     "B2B SaaS": 10,
     "Developer Tools": 4
   },
-  "worked_at_company_stages": ["series_b", "growth", "public"],
-  "has_enterprise_experience": true,
-  "has_smb_experience": false,
-  "has_consumer_experience": false,
-  "has_0_to_1_experience": true,
-  "has_scaling_experience": true,
-  "has_platform_product_experience": true,
-  "has_growth_experience": true,
-  "has_pricing_experience": false,
-
-  "can_read_code": true,
-  "can_write_code": false,
+  "worked_at_company_stages": [
+    "series_b",
+    "growth",
+    "public"
+  ],
   "coding_languages": [],
   "technical_background": "Computer Science degree; 10+ years working embedded with engineering teams on software products",
-  "comfortable_with_data": true,
   "data_tools": [],
-  "has_worked_embedded_with_engineering": true,
-  "has_written_technical_specs": true,
   "familiarity_with_apis": "medium",
-
-  "product_areas": ["software products", "developer tooling", "pilot programs", "cross-functional product delivery"],
-  "strong_in_discovery": true,
-  "strong_in_delivery": true,
-  "strong_in_strategy": true,
-  "strong_in_growth": true,
-  "has_internationalization_experience": true,
-  "has_launched_products": true,
+  "product_areas": [
+    "software products",
+    "developer tooling",
+    "pilot programs",
+    "cross-functional product delivery"
+  ],
   "notable_launches": [
     {
       "description": "Partnered with 20+ cross-functional teams to launch new services",
@@ -70,41 +71,168 @@
   ],
   "design_collaboration_depth": "high",
   "research_experience": "high",
-
   "largest_company_size": null,
   "smallest_company_size": null,
   "largest_arr_supported": null,
   "largest_arr_supported_context": null,
   "largest_dau_supported": 10000,
-  "has_owned_revenue_metric": true,
-  "has_owned_retention_metric": true,
-  "cross_functional_scope": ["Engineering", "Design", "QA", "Marketing", "Business Analysis"],
-  "has_worked_with_sales": false,
-  "has_worked_with_legal_compliance": null,
-  "budget_ownership": true,
-  "vendor_management": null,
-
+  "cross_functional_scope": [
+    "Engineering",
+    "Design",
+    "QA",
+    "Marketing",
+    "Business Analysis"
+  ],
   "highest_degree": "BS",
   "degree_field": "Computer Science",
   "university_tier": null,
-  "has_mba": false,
   "certifications": [],
-  "has_published_work": false,
-  "has_conference_speaking": false,
-  "has_notable_side_projects": false,
-
   "country": "US",
   "work_authorization": "citizen",
   "requires_sponsorship": false,
   "willing_to_relocate": false,
   "current_location": "Montpelier, VT",
   "timezone": "ET",
-
-  "communication_artifacts": ["roadmaps", "product requirements", "executive presentations"],
+  "communication_artifacts": [
+    "roadmaps",
+    "product requirements",
+    "executive presentations"
+  ],
   "stakeholder_management_level": "VP and above",
-  "has_exec_exposure": true,
   "presentation_experience": "regular internal including executive level",
   "written_communication_strength": "high",
-  "self_assessed_strengths": ["cross-functional team leadership", "technical product delivery", "data-driven roadmapping", "churn reduction", "enterprise software"],
-  "self_assessed_gaps": []
+  "self_assessed_strengths": [
+    "cross-functional team leadership",
+    "technical product delivery",
+    "data-driven roadmapping",
+    "churn reduction",
+    "enterprise software"
+  ],
+  "self_assessed_gaps": [],
+  "skills": [
+    {
+      "name": "platform product management",
+      "confirmed": true
+    },
+    {
+      "name": "pricing and packaging",
+      "confirmed": false
+    },
+    {
+      "name": "growth experimentation",
+      "confirmed": true
+    },
+    {
+      "name": "0 to 1 product development",
+      "confirmed": true
+    },
+    {
+      "name": "revenue metric ownership",
+      "confirmed": true
+    },
+    {
+      "name": "retention metric ownership",
+      "confirmed": true
+    },
+    {
+      "name": "sales-assisted GTM",
+      "confirmed": false
+    },
+    {
+      "name": "enterprise product management",
+      "confirmed": true
+    },
+    {
+      "name": "scaling existing products",
+      "confirmed": true
+    },
+    {
+      "name": "people management",
+      "confirmed": true
+    },
+    {
+      "name": "software development",
+      "confirmed": false
+    },
+    {
+      "name": "data analysis",
+      "confirmed": true
+    },
+    {
+      "name": "consumer product management",
+      "confirmed": false
+    },
+    {
+      "name": "SMB product management",
+      "confirmed": false
+    },
+    {
+      "name": "director or above leadership",
+      "confirmed": false
+    },
+    {
+      "name": "product launches",
+      "confirmed": true
+    },
+    {
+      "name": "budget ownership",
+      "confirmed": true
+    },
+    {
+      "name": "MBA",
+      "confirmed": false
+    },
+    {
+      "name": "published work",
+      "confirmed": false
+    },
+    {
+      "name": "conference speaking",
+      "confirmed": false
+    },
+    {
+      "name": "notable side projects",
+      "confirmed": false
+    },
+    {
+      "name": "executive exposure",
+      "confirmed": true
+    },
+    {
+      "name": "product discovery",
+      "confirmed": true
+    },
+    {
+      "name": "product delivery",
+      "confirmed": true
+    },
+    {
+      "name": "product strategy",
+      "confirmed": true
+    },
+    {
+      "name": "growth strategy",
+      "confirmed": true
+    },
+    {
+      "name": "internationalization",
+      "confirmed": true
+    },
+    {
+      "name": "embedded engineering partnership",
+      "confirmed": true
+    },
+    {
+      "name": "technical specification writing",
+      "confirmed": true
+    },
+    {
+      "name": "code reading",
+      "confirmed": true
+    }
+  ],
+  "unanswered_skills": [
+    "legal and compliance",
+    "vendor management"
+  ]
 }

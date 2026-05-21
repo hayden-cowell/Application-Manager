@@ -103,13 +103,13 @@ STORAGE_PATH=data/assessments
 
 All schemas live in `schemas.py` using Pydantic v2. These are the source of truth for data shape across the service.
 
-### Three-state boolean system
+### Three-state skill system
 
-Experience and skill fields use `Optional[bool] = null` (not plain `bool`) to represent three distinct states:
+Skills use the `Skill` model rather than individual `Optional[bool]` fields to represent three distinct states:
 
-- `true` -- candidate has explicitly confirmed this experience
-- `false` -- candidate has explicitly confirmed they do not have this experience
-- `null` -- not yet collected; treat as unknown, do not penalize
+- `Skill(confirmed=True)` -- candidate has explicitly confirmed they have this skill
+- `Skill(confirmed=False)` -- candidate has explicitly confirmed they do not have this skill
+- Skill name in `unanswered_skills` -- not yet collected; treat as unknown, do not penalize
 
 Fields that are eligibility-critical and collected in early onboarding stay as plain `bool` because they have a meaningful default: `requires_sponsorship`, `willing_to_relocate`, `open_to_ic_and_management`, `onboarding_complete`.
 
@@ -122,12 +122,11 @@ class NotableLaunch(BaseModel):
     description: str
     impact: str
 
-class UserProfile(BaseModel):
-    # Metadata
-    profile_id: str
-    profile_version: int = 1
-    onboarding_complete: bool = False
+class Skill(BaseModel):
+    name: str
+    confirmed: bool    # True = has it, False = confirmed absent
 
+class UserProfile(BaseModel):
     # Identity and targeting
     target_roles: list[str]
     target_industries: list[str]
@@ -143,47 +142,26 @@ class UserProfile(BaseModel):
     current_level: str
     highest_level_held: str
     leveling_trajectory: str
-    has_management_experience: Optional[bool] = None
     years_managing: Optional[int] = None
     largest_team_managed: Optional[int] = None
-    has_director_or_above_experience: Optional[bool] = None
 
     # Domain and industry depth
     primary_domain: str
     secondary_domains: list[str] = []
     domain_years: dict[str, int]
     worked_at_company_stages: list[str]
-    has_enterprise_experience: Optional[bool] = None
-    has_smb_experience: Optional[bool] = None
-    has_consumer_experience: Optional[bool] = None
-    has_0_to_1_experience: Optional[bool] = None
-    has_scaling_experience: Optional[bool] = None
-    has_platform_product_experience: Optional[bool] = None
-    has_growth_experience: Optional[bool] = None
 
-    # Technical depth
-    can_read_code: Optional[bool] = None
-    can_write_code: Optional[bool] = None
+    # Technical depth (structured supplements -- populated when relevant skills are confirmed)
     coding_languages: list[str] = []
     technical_background: Optional[str] = None
-    comfortable_with_data: Optional[bool] = None
     data_tools: list[str] = []
-    has_worked_embedded_with_engineering: Optional[bool] = None
-    has_written_technical_specs: Optional[bool] = None
-    familiarity_with_apis: Optional[str] = None     # 'none', 'low', 'medium', 'high'
+    familiarity_with_apis: str             # 'none', 'low', 'medium', 'high'
 
     # Product craft
     product_areas: list[str] = []
-    strong_in_discovery: Optional[bool] = None
-    strong_in_delivery: Optional[bool] = None
-    strong_in_strategy: Optional[bool] = None
-    strong_in_growth: Optional[bool] = None
-    has_pricing_experience: Optional[bool] = None
-    has_internationalization_experience: Optional[bool] = None
-    has_launched_products: Optional[bool] = None
     notable_launches: list[NotableLaunch] = []
-    design_collaboration_depth: Optional[str] = None  # 'low', 'medium', 'high'
-    research_experience: Optional[str] = None         # 'none', 'low', 'moderate', 'high'
+    design_collaboration_depth: str        # 'low', 'medium', 'high'
+    research_experience: str               # 'none', 'low', 'moderate', 'high'
 
     # Scope and impact
     largest_company_size: Optional[int] = None
@@ -191,23 +169,13 @@ class UserProfile(BaseModel):
     largest_arr_supported: Optional[str] = None
     largest_arr_supported_context: Optional[str] = None  # e.g. 'platform_pm_not_direct_owner'
     largest_dau_supported: Optional[int] = None
-    has_owned_revenue_metric: Optional[bool] = None
-    has_owned_retention_metric: Optional[bool] = None
     cross_functional_scope: list[str] = []
-    has_worked_with_sales: Optional[bool] = None
-    has_worked_with_legal_compliance: Optional[bool] = None
-    budget_ownership: Optional[bool] = None
-    vendor_management: Optional[bool] = None
 
     # Credentials and education
     highest_degree: Optional[str] = None
     degree_field: Optional[str] = None
     university_tier: Optional[str] = None
-    has_mba: Optional[bool] = None
     certifications: list[str] = []
-    has_published_work: Optional[bool] = None
-    has_conference_speaking: Optional[bool] = None
-    has_notable_side_projects: Optional[bool] = None
 
     # Work authorization (eligibility-critical -- plain bool)
     country: str
@@ -220,20 +188,30 @@ class UserProfile(BaseModel):
     # Soft signals
     communication_artifacts: list[str] = []
     stakeholder_management_level: Optional[str] = None
-    has_exec_exposure: Optional[bool] = None
     presentation_experience: Optional[str] = None
-    written_communication_strength: Optional[str] = None  # 'low', 'medium', 'high'
+    written_communication_strength: str   # 'low', 'medium', 'high'
     self_assessed_strengths: list[str] = []
 
     # self_assessed_gaps: free-form weaknesses the candidate volunteers.
-    # Must NOT duplicate fields already captured by confirmed_false flags --
-    # use only for nuanced gaps that do not map to a boolean flag
-    # (e.g. "executive storytelling", "regulated industry experience").
-    # Duplication causes self_assessed_gaps to override the null state of
-    # boolean flags, collapsing null into false and breaking the three-state
-    # system. The profile builder (Phase 2) should strip self_assessed_gaps
-    # entries that duplicate confirmed_false flags before saving.
+    # Must NOT duplicate skills already in confirmed_false (i.e. skills with
+    # confirmed=False). Duplication causes self_assessed_gaps to override the
+    # unanswered state of skills, collapsing unknown into absent and breaking
+    # the three-state system. Use only for nuanced gaps that don't map to a
+    # named skill (e.g. "executive storytelling", "regulated industry experience").
+    # The profile builder (Phase 2) should strip self_assessed_gaps entries
+    # that duplicate confirmed_false skills before saving.
     self_assessed_gaps: list[str] = []
+
+    # Skill list (replaces PM-specific boolean flags)
+    # confirmed=True: has this skill; confirmed=False: confirmed absent
+    skills: list[Skill] = []
+    # Skills not yet collected (null / unknown state)
+    unanswered_skills: list[str] = []
+
+    # Metadata
+    profile_id: str
+    profile_version: int = 1
+    onboarding_complete: bool = False
 ```
 
 ### JobPosting
@@ -538,41 +516,40 @@ Always send (competitiveness core):
 
 Conditional (only if non-null and non-empty):
 - `secondary_domains`, `target_industries`, `excluded_industries`
-- Management block: only if `has_management_experience is True`
-- Technical block: only if `can_write_code is True`
-- Data block: only if `comfortable_with_data is True`
+- Supplemental context blocks (tied to skill confirmation):
+  - `years_managing`, `largest_team_managed` when 'people management' is confirmed
+  - `coding_languages`, `technical_background` when 'software development' is confirmed
+  - `data_tools` when 'data analysis' is confirmed
 - `largest_arr_supported` + `largest_arr_supported_context` (together, inline)
 - `largest_dau_supported`, `largest_company_size`
 - `notable_launches`, `self_assessed_gaps`, `self_assessed_strengths`
 
-Boolean flags compaction (three-state aware):
+Skill list compaction (three-state aware):
 ```python
-confirmed_true = []
-confirmed_false = []
+confirmed_present = [s.name for s in profile.skills if s.confirmed]
+confirmed_absent  = [s.name for s in profile.skills if not s.confirmed]
+unknown_skills    = profile.unanswered_skills
 
-# has_management_experience, can_write_code, and comfortable_with_data are
-# handled by separate conditional blocks after this loop -- not included here
-flag_fields = [
-    'has_0_to_1_experience', 'has_scaling_experience',
-    'has_platform_product_experience', 'has_enterprise_experience',
-    'has_consumer_experience', 'has_growth_experience',
-    'has_pricing_experience', 'has_owned_revenue_metric',
-    'has_worked_with_sales', 'has_smb_experience',
-]
+# Supplemental fields for skills that carry structured context
+_skill_names = {s.name for s in profile.skills if s.confirmed}
+if 'people management' in _skill_names:
+    d['years_managing'] = profile.years_managing
+    d['largest_team_managed'] = profile.largest_team_managed
+if 'software development' in _skill_names:
+    d['coding_languages'] = profile.coding_languages
+    d['technical_background'] = profile.technical_background
+if 'data analysis' in _skill_names:
+    d['data_tools'] = profile.data_tools
 
-for field in flag_fields:
-    val = getattr(profile, field)
-    if val is True:
-        confirmed_true.append(field)
-    elif val is False:
-        confirmed_false.append(field)
-    # null: omit entirely -- absence means unknown
-
-if confirmed_true:
-    d['confirmed_true'] = confirmed_true
-if confirmed_false:
-    d['confirmed_false'] = confirmed_false
+if confirmed_present:
+    d['confirmed_true'] = confirmed_present
+if confirmed_absent:
+    d['confirmed_false'] = confirmed_absent
+if unknown_skills:
+    d['unanswered'] = unknown_skills
 ```
+
+The prompt receives the same `confirmed_true` / `confirmed_false` / `unanswered` keys as before -- only the source changed from hardcoded field names to dynamic skill names.
 
 Use `separators=(',', ':')` in `json.dumps()` to remove whitespace from the serialized payload.
 
@@ -1052,6 +1029,14 @@ The original test profiles were built with self_assessed_gaps entries that dupli
 ### Why output length is constrained
 
 Output tokens are the primary cost driver at Sonnet's pricing. Unconstrained reasoning summaries were running 1,100-1,650 tokens per call. Adding length constraints (4 sentences max for reasoning, 5 items max for gaps) reduced output tokens by ~23% with no meaningful loss in assessment quality. Users read the first two sentences of reasoning most of the time anyway.
+
+### Why the profile schema was migrated to a role-agnostic skill list
+
+The original schema used PM-specific boolean flags (`has_pricing_experience`, `has_growth_experience`, etc.). This created two problems: the schema was not portable to other role types (SWE, designer, data scientist), and adding a new role type would require schema migrations, new onboarding flows, and new prompt logic for every discipline added.
+
+The skill list approach replaces boolean flags with a list of named skills, each with a confirmed boolean. The three-state system (true/false/null) is preserved: `confirmed=True` means has it, `confirmed=False` means confirmed absent, and presence in `unanswered_skills` means not yet collected. The prompt receives the same `confirmed_true`/`confirmed_false`/`unanswered` structure as before -- only the source of that data changed from hardcoded flag names to dynamic skill names. This makes the schema role-agnostic: PM skills, SWE skills, and designer skills all use the same `Skill` model. New disciplines add skills to the question bank without touching the schema.
+
+The migration from boolean flags to skill entries is lossless: each flag maps to a canonical skill name, and the confirmed/None/False state maps directly to the three-state representation.
 
 ---
 

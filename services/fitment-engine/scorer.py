@@ -93,6 +93,13 @@ def build_assessment(parsed: dict, request: ScoreRequest) -> FitAssessment:
     )
 
 
+def _skill_confirmed(profile, skill_name: str):
+    for s in profile.skills:
+        if s.name == skill_name:
+            return s.confirmed  # True or False
+    return None  # unanswered or not in skill list
+
+
 def _gate_failures(profile, job) -> list[str]:
     failures = []
 
@@ -105,7 +112,7 @@ def _gate_failures(profile, job) -> list[str]:
             )
 
     if _requires_executive(job.title, job.description):
-        if profile.has_director_or_above_experience is False:
+        if _skill_confirmed(profile, 'director or above leadership') is False:
             failures.append(
                 'Role requires Director/VP-level leadership; candidate has confirmed they do not have it'
             )

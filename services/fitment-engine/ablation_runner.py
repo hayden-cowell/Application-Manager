@@ -28,7 +28,7 @@ import json
 from datetime import datetime, timezone
 
 from scorer import score_job
-from schemas import ScoreRequest, UserProfile, JobPosting, ResumeBaseline
+from schemas import ScoreRequest, UserProfile, JobPosting, ResumeBaseline, Skill
 
 RESULTS_DIR = Path('data/ablation_results')
 
@@ -56,20 +56,6 @@ def load_resumes() -> dict[str, ResumeBaseline]:
 # Sparse profile builder (Category 1)
 # ---------------------------------------------------------------------------
 
-_OPTIONAL_BOOL_FIELDS = [
-    'has_management_experience', 'has_director_or_above_experience',
-    'has_enterprise_experience', 'has_smb_experience', 'has_consumer_experience',
-    'has_0_to_1_experience', 'has_scaling_experience', 'has_platform_product_experience',
-    'has_growth_experience', 'can_read_code', 'can_write_code', 'comfortable_with_data',
-    'has_worked_embedded_with_engineering', 'has_written_technical_specs',
-    'has_internationalization_experience', 'has_launched_products',
-    'strong_in_discovery', 'strong_in_delivery', 'strong_in_strategy', 'strong_in_growth',
-    'has_owned_revenue_metric', 'has_owned_retention_metric',
-    'has_worked_with_sales', 'has_worked_with_legal_compliance',
-    'budget_ownership', 'vendor_management', 'has_mba', 'has_published_work',
-    'has_conference_speaking', 'has_notable_side_projects', 'has_exec_exposure',
-]
-
 _OPTIONAL_SCALAR_FIELDS = [
     'largest_arr_supported', 'largest_arr_supported_context', 'largest_dau_supported',
     'largest_company_size', 'smallest_company_size', 'technical_background',
@@ -87,8 +73,10 @@ _LIST_FIELDS_TO_CLEAR = [
 def build_sparse_profile(full: UserProfile) -> UserProfile:
     d = full.model_dump()
     d['profile_id'] = 'profile_hayden_sparse'
-    for f in _OPTIONAL_BOOL_FIELDS:
-        d[f] = None
+    # Move all skills to unanswered — simulates a day-one user with no flags answered
+    all_skill_names = [s['name'] for s in d.get('skills', [])]
+    d['skills'] = []
+    d['unanswered_skills'] = all_skill_names + list(d.get('unanswered_skills', []))
     for f in _OPTIONAL_SCALAR_FIELDS:
         d[f] = None
     for f in _LIST_FIELDS_TO_CLEAR:
@@ -233,11 +221,31 @@ def run_category_1(jobs: dict, profiles: dict, resumes: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 STANDARD_FLAGS = {
-    'has_growth_experience':           ['job_borderline', 'job_gap_match', 'job_pm_workos', 'job_pm_edmunds_adtech'],
-    'has_pricing_experience':          ['job_borderline', 'job_gap_match', 'job_sr_pm_autodesk_access'],
-    'has_0_to_1_experience':           ['job_pm_workos', 'job_lead_pm_panorama_platform', 'job_strong_fit'],
-    'has_platform_product_experience': ['job_strong_fit', 'job_lead_pm_panorama_platform', 'job_tpm_cloud_platform'],
+    'growth experimentation':      ['job_borderline', 'job_gap_match', 'job_pm_workos', 'job_pm_edmunds_adtech'],
+    'pricing and packaging':       ['job_borderline', 'job_gap_match', 'job_sr_pm_autodesk_access'],
+    '0 to 1 product development':  ['job_pm_workos', 'job_lead_pm_panorama_platform', 'job_strong_fit'],
+    'platform product management': ['job_strong_fit', 'job_lead_pm_panorama_platform', 'job_tpm_cloud_platform'],
 }
+
+
+def _set_skill(profile: UserProfile, skill_name: str, val) -> UserProfile:
+    skills_without     = [s for s in profile.skills if s.name != skill_name]
+    unanswered_without = [n for n in profile.unanswered_skills if n != skill_name]
+    if val is True:
+        return profile.model_copy(update={
+            'skills': skills_without + [Skill(name=skill_name, confirmed=True)],
+            'unanswered_skills': unanswered_without,
+        })
+    elif val is False:
+        return profile.model_copy(update={
+            'skills': skills_without + [Skill(name=skill_name, confirmed=False)],
+            'unanswered_skills': unanswered_without,
+        })
+    else:  # None
+        return profile.model_copy(update={
+            'skills': skills_without,
+            'unanswered_skills': unanswered_without + [skill_name],
+        })
 
 _ARR_VARIANTS = [
     ('$800M+ (platform supporting ZoomInfo core data products)', 'platform_pm_not_direct_owner', '$800M+_ctx'),
@@ -271,8 +279,8 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
     fn_deltas_by_flag: dict[str, list] = {}
 
     # ---- Standard three-state flags ----
-    for flag, job_ids in STANDARD_FLAGS.items():
-        print(f'\n--- Flag: {flag} ---')
+    for skill_name, job_ids in STANDARD_FLAGS.items():
+        print(f'\n--- Skill: {skill_name} ---')
         header = (
             f'{"Job":<40} {"True":>5} {"False":>5} {"Null":>5} '
             f'{"T-F":>5} {"F-N":>5}  {"Conf T/F/N":<22} {"Tier T/F/N"}'
@@ -281,7 +289,7 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
         print('-' * len(header))
 
         flag_results = []
-        fn_deltas_by_flag[flag] = []
+        fn_deltas_by_flag[skill_name] = []
 
         for job_id in job_ids:
             if job_id not in jobs:
@@ -291,9 +299,8 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
 
             row: dict[str, dict] = {}
             for val in (True, False, None):
-                variant = base.model_copy(update={
-                    flag: val,
-                    'self_assessed_gaps': [],  # isolate flag signal from self_assessed overlap
+                variant = _set_skill(base, skill_name, val).model_copy(update={
+                    'self_assessed_gaps': [],  # isolate skill signal from self_assessed overlap
                 })
                 r = run_score(job, variant, resume)
                 _add_usage(totals, r)
@@ -305,7 +312,7 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
 
             tf_delta = (t['score'] - f_['score']) if not (tg or fg) else None
             fn_delta = (f_['score'] - n['score']) if not (fg or ng) else None
-            fn_deltas_by_flag[flag].append(fn_delta)
+            fn_deltas_by_flag[skill_name].append(fn_delta)
 
             tf_str  = f'{tf_delta:+d}' if tf_delta is not None else 'n/a'
             fn_mark = '!' if (fn_delta == 0) else ('?' if (fn_delta is not None and fn_delta < 0) else ' ')
@@ -327,7 +334,7 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
                 'tf_delta': tf_delta, 'fn_delta': fn_delta,
             })
 
-        all_flag_results[flag] = flag_results
+        all_flag_results[skill_name] = flag_results
 
     # ---- largest_arr_supported ----
     print(f'\n--- Field: largest_arr_supported ---')
@@ -406,7 +413,7 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
     print('-' * len(hdr))
 
     warnings, partials = [], []
-    for flag, deltas in fn_deltas_by_flag.items():
+    for skill_name, deltas in fn_deltas_by_flag.items():
         valid_d = [d for d in deltas if d is not None]
         zero_count = sum(1 for d in valid_d if d == 0)
         n = len(valid_d)
@@ -414,13 +421,13 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
             verdict = 'no data'
         elif zero_count == n:
             verdict = 'WARNING ⚠'
-            warnings.append(flag)
+            warnings.append(skill_name)
         elif zero_count > 0:
             verdict = f'Partial ({zero_count}/{n} zero)'
-            partials.append(flag)
+            partials.append(skill_name)
         else:
             verdict = 'OK ✓'
-        print(f'{flag:<35} {n:>10} {zero_count:>8}   {verdict}')
+        print(f'{skill_name:<35} {n:>10} {zero_count:>8}   {verdict}')
 
     print()
     if warnings:

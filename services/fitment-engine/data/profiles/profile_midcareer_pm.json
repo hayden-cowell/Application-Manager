@@ -30,10 +30,8 @@
   "current_level": "Product Manager",
   "highest_level_held": "Product Manager",
   "leveling_trajectory": "Operations Analyst to Junior PM to APM to PM",
-  "has_management_experience": true,
   "years_managing": 4,
   "largest_team_managed": 15,
-  "has_director_or_above_experience": false,
   "primary_domain": "B2B SaaS",
   "secondary_domains": [
     "Consumer",
@@ -49,27 +47,14 @@
     "growth",
     "public"
   ],
-  "has_enterprise_experience": true,
-  "has_smb_experience": true,
-  "has_consumer_experience": true,
-  "has_0_to_1_experience": false,
-  "has_scaling_experience": true,
-  "has_platform_product_experience": false,
-  "has_growth_experience": true,
-  "has_pricing_experience": true,
-  "can_read_code": true,
-  "can_write_code": false,
   "coding_languages": [
     "Python"
   ],
   "technical_background": "Computer Engineering degree; operations analyst background; familiar with Python and data viz tools",
-  "comfortable_with_data": true,
   "data_tools": [
     "Tableau",
     "Python"
   ],
-  "has_worked_embedded_with_engineering": true,
-  "has_written_technical_specs": true,
   "familiarity_with_apis": "low",
   "product_areas": [
     "conversion optimization",
@@ -77,12 +62,6 @@
     "pricing",
     "user experience"
   ],
-  "strong_in_discovery": true,
-  "strong_in_delivery": true,
-  "strong_in_strategy": true,
-  "strong_in_growth": true,
-  "has_internationalization_experience": true,
-  "has_launched_products": true,
   "notable_launches": [
     {
       "description": "Led team to solve number one cause of customer complaints, completed six months ahead of schedule",
@@ -104,8 +83,6 @@
   "largest_arr_supported": null,
   "largest_arr_supported_context": null,
   "largest_dau_supported": null,
-  "has_owned_revenue_metric": true,
-  "has_owned_retention_metric": true,
   "cross_functional_scope": [
     "Engineering",
     "Design",
@@ -113,18 +90,10 @@
     "Business",
     "Operations"
   ],
-  "has_worked_with_sales": true,
-  "has_worked_with_legal_compliance": null,
-  "budget_ownership": null,
-  "vendor_management": true,
   "highest_degree": "BS",
   "degree_field": "Computer Engineering",
   "university_tier": null,
-  "has_mba": false,
   "certifications": [],
-  "has_published_work": false,
-  "has_conference_speaking": true,
-  "has_notable_side_projects": false,
   "country": "US",
   "work_authorization": "citizen",
   "requires_sponsorship": false,
@@ -137,7 +106,6 @@
     "business cases"
   ],
   "stakeholder_management_level": "VP and below",
-  "has_exec_exposure": true,
   "presentation_experience": "regular internal, occasional external (conference organizer)",
   "written_communication_strength": "high",
   "self_assessed_strengths": [
@@ -147,6 +115,131 @@
     "user research",
     "delivery"
   ],
-  "self_assessed_gaps": [
+  "self_assessed_gaps": [],
+  "skills": [
+    {
+      "name": "platform product management",
+      "confirmed": false
+    },
+    {
+      "name": "pricing and packaging",
+      "confirmed": true
+    },
+    {
+      "name": "growth experimentation",
+      "confirmed": true
+    },
+    {
+      "name": "0 to 1 product development",
+      "confirmed": false
+    },
+    {
+      "name": "revenue metric ownership",
+      "confirmed": true
+    },
+    {
+      "name": "retention metric ownership",
+      "confirmed": true
+    },
+    {
+      "name": "sales-assisted GTM",
+      "confirmed": true
+    },
+    {
+      "name": "enterprise product management",
+      "confirmed": true
+    },
+    {
+      "name": "scaling existing products",
+      "confirmed": true
+    },
+    {
+      "name": "people management",
+      "confirmed": true
+    },
+    {
+      "name": "software development",
+      "confirmed": false
+    },
+    {
+      "name": "data analysis",
+      "confirmed": true
+    },
+    {
+      "name": "consumer product management",
+      "confirmed": true
+    },
+    {
+      "name": "SMB product management",
+      "confirmed": true
+    },
+    {
+      "name": "director or above leadership",
+      "confirmed": false
+    },
+    {
+      "name": "product launches",
+      "confirmed": true
+    },
+    {
+      "name": "vendor management",
+      "confirmed": true
+    },
+    {
+      "name": "MBA",
+      "confirmed": false
+    },
+    {
+      "name": "published work",
+      "confirmed": false
+    },
+    {
+      "name": "conference speaking",
+      "confirmed": true
+    },
+    {
+      "name": "notable side projects",
+      "confirmed": false
+    },
+    {
+      "name": "executive exposure",
+      "confirmed": true
+    },
+    {
+      "name": "product discovery",
+      "confirmed": true
+    },
+    {
+      "name": "product delivery",
+      "confirmed": true
+    },
+    {
+      "name": "product strategy",
+      "confirmed": true
+    },
+    {
+      "name": "growth strategy",
+      "confirmed": true
+    },
+    {
+      "name": "internationalization",
+      "confirmed": true
+    },
+    {
+      "name": "embedded engineering partnership",
+      "confirmed": true
+    },
+    {
+      "name": "technical specification writing",
+      "confirmed": true
+    },
+    {
+      "name": "code reading",
+      "confirmed": true
+    }
+  ],
+  "unanswered_skills": [
+    "legal and compliance",
+    "budget ownership"
   ]
 }

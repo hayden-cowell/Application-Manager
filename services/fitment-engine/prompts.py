@@ -242,49 +242,27 @@ def build_pertinent_profile(profile: UserProfile) -> dict:
         if v:
             d[f] = v
 
-    flag_fields = [
-        'has_0_to_1_experience', 'has_scaling_experience',
-        'has_platform_product_experience', 'has_enterprise_experience',
-        'has_consumer_experience', 'has_growth_experience',
-        'has_pricing_experience', 'has_owned_revenue_metric',
-        'has_worked_with_sales', 'has_smb_experience',
-    ]
+    confirmed_present = [s.name for s in profile.skills if s.confirmed]
+    confirmed_absent  = [s.name for s in profile.skills if not s.confirmed]
+    unknown_skills    = profile.unanswered_skills
 
-    confirmed_true, confirmed_false = [], []
-    for field in flag_fields:
-        val = getattr(profile, field)
-        if val is True:
-            confirmed_true.append(field)
-        elif val is False:
-            confirmed_false.append(field)
-        # None: omit entirely — absence means not yet collected
-
-    if profile.has_management_experience is True:
-        d['has_management_experience'] = True
+    # Supplemental fields for skills that carry structured context
+    _skill_names = {s.name for s in profile.skills if s.confirmed}
+    if 'people management' in _skill_names:
         d['years_managing'] = profile.years_managing
         d['largest_team_managed'] = profile.largest_team_managed
-        if profile.has_director_or_above_experience is not None:
-            d['has_director_or_above_experience'] = profile.has_director_or_above_experience
-    elif profile.has_management_experience is False:
-        confirmed_false.append('has_management_experience')
-
-    if profile.can_write_code is True:
-        d['can_write_code'] = True
+    if 'software development' in _skill_names:
         d['coding_languages'] = profile.coding_languages
         d['technical_background'] = profile.technical_background
-    elif profile.can_write_code is False:
-        confirmed_false.append('can_write_code')
-
-    if profile.comfortable_with_data is True:
-        d['comfortable_with_data'] = True
+    if 'data analysis' in _skill_names:
         d['data_tools'] = profile.data_tools
-    elif profile.comfortable_with_data is False:
-        confirmed_false.append('comfortable_with_data')
 
-    if confirmed_true:
-        d['confirmed_true'] = confirmed_true
-    if confirmed_false:
-        d['confirmed_false'] = confirmed_false
+    if confirmed_present:
+        d['confirmed_true'] = confirmed_present
+    if confirmed_absent:
+        d['confirmed_false'] = confirmed_absent
+    if unknown_skills:
+        d['unanswered'] = unknown_skills
 
     if profile.largest_arr_supported:
         d['largest_arr_supported'] = profile.largest_arr_supported

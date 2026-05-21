@@ -7,13 +7,19 @@ class NotableLaunch(BaseModel):
     impact: str
 
 
+class Skill(BaseModel):
+    name: str
+    confirmed: bool    # True = has it, False = confirmed absent
+
+
 class UserProfile(BaseModel):
-    # NOTE: self_assessed_gaps must not duplicate fields already captured by confirmed_false
-    # flags. Duplication causes self_assessed_gaps to override the null state of boolean flags,
-    # collapsing null into false and breaking the three-state system for any skill mentioned
-    # in both places. Use self_assessed_gaps only for nuanced gaps that don't map to a boolean
-    # flag (e.g. "executive storytelling", "regulated industry experience"). The profile builder
-    # in Phase 2 should strip self_assessed_gaps entries that duplicate confirmed_false flags.
+    # NOTE: self_assessed_gaps must not duplicate skills already in confirmed_false
+    # (i.e. skills with confirmed=False). Duplication causes self_assessed_gaps to override
+    # the unanswered state of skills, collapsing unknown into absent and breaking the
+    # three-state system for any skill mentioned in both places. Use self_assessed_gaps only
+    # for nuanced gaps that don't map to a named skill (e.g. "executive storytelling",
+    # "regulated industry experience"). The profile builder in Phase 2 should strip
+    # self_assessed_gaps entries that duplicate confirmed_false skills.
 
     # Identity and targeting
     target_roles: list[str]
@@ -30,44 +36,23 @@ class UserProfile(BaseModel):
     current_level: str
     highest_level_held: str
     leveling_trajectory: str
-    has_management_experience: Optional[bool] = None
     years_managing: Optional[int] = None
     largest_team_managed: Optional[int] = None
-    has_director_or_above_experience: Optional[bool] = None
 
     # Domain and industry depth
     primary_domain: str
     secondary_domains: list[str] = []
     domain_years: dict[str, int]
     worked_at_company_stages: list[str]
-    has_enterprise_experience: Optional[bool] = None
-    has_smb_experience: Optional[bool] = None
-    has_consumer_experience: Optional[bool] = None
-    has_0_to_1_experience: Optional[bool] = None
-    has_scaling_experience: Optional[bool] = None
-    has_platform_product_experience: Optional[bool] = None
-    has_growth_experience: Optional[bool] = None
 
-    # Technical depth
-    can_read_code: Optional[bool] = None
-    can_write_code: Optional[bool] = None
+    # Technical depth (structured supplements — populated when relevant skills are confirmed)
     coding_languages: list[str] = []
     technical_background: Optional[str] = None
-    comfortable_with_data: Optional[bool] = None
     data_tools: list[str] = []
-    has_worked_embedded_with_engineering: Optional[bool] = None
-    has_written_technical_specs: Optional[bool] = None
     familiarity_with_apis: str             # 'none', 'low', 'medium', 'high'
 
     # Product craft
     product_areas: list[str] = []
-    strong_in_discovery: Optional[bool] = None
-    strong_in_delivery: Optional[bool] = None
-    strong_in_strategy: Optional[bool] = None
-    strong_in_growth: Optional[bool] = None
-    has_pricing_experience: Optional[bool] = None
-    has_internationalization_experience: Optional[bool] = None
-    has_launched_products: Optional[bool] = None
     notable_launches: list[NotableLaunch] = []
     design_collaboration_depth: str        # 'low', 'medium', 'high'
     research_experience: str               # 'none', 'low', 'moderate', 'high'
@@ -78,23 +63,13 @@ class UserProfile(BaseModel):
     largest_arr_supported: Optional[str] = None
     largest_arr_supported_context: Optional[str] = None
     largest_dau_supported: Optional[int] = None
-    has_owned_revenue_metric: Optional[bool] = None
-    has_owned_retention_metric: Optional[bool] = None
     cross_functional_scope: list[str] = []
-    has_worked_with_sales: Optional[bool] = None
-    has_worked_with_legal_compliance: Optional[bool] = None
-    budget_ownership: Optional[bool] = None
-    vendor_management: Optional[bool] = None
 
     # Credentials and education
     highest_degree: Optional[str] = None
     degree_field: Optional[str] = None
     university_tier: Optional[str] = None
-    has_mba: Optional[bool] = None
     certifications: list[str] = []
-    has_published_work: Optional[bool] = None
-    has_conference_speaking: Optional[bool] = None
-    has_notable_side_projects: Optional[bool] = None
 
     # Work authorization
     country: str
@@ -107,13 +82,18 @@ class UserProfile(BaseModel):
     # Soft signals
     communication_artifacts: list[str] = []
     stakeholder_management_level: Optional[str] = None
-    has_exec_exposure: Optional[bool] = None
     presentation_experience: Optional[str] = None
     written_communication_strength: str   # 'low', 'medium', 'high'
     self_assessed_strengths: list[str] = []
-    # Free-form weaknesses the candidate volunteers. Must not duplicate confirmed_false flags --
-    # use only for nuanced gaps without a direct boolean flag equivalent. See class-level note.
+    # Free-form weaknesses the candidate volunteers. Must not duplicate confirmed_false skills --
+    # use only for nuanced gaps without a direct skill equivalent. See class-level note.
     self_assessed_gaps: list[str] = []
+
+    # Skill list (replaces PM-specific boolean flags)
+    # confirmed=True: has this skill; confirmed=False: confirmed absent
+    skills: list[Skill] = []
+    # Skills not yet collected (null / unknown state)
+    unanswered_skills: list[str] = []
 
     # Metadata
     profile_id: str

@@ -2,11 +2,29 @@
   "profile_id": "profile_senior_pm",
   "profile_version": 1,
   "onboarding_complete": true,
-  "target_roles": ["Senior PM", "Group PM", "Head of Product"],
-  "target_industries": ["B2B SaaS", "Developer Tools", "Fintech"],
-  "excluded_industries": ["Gambling", "Defense"],
-  "work_arrangement": ["remote", "hybrid"],
-  "target_company_stages": ["Series B", "Series C", "growth"],
+  "target_roles": [
+    "Senior PM",
+    "Group PM",
+    "Head of Product"
+  ],
+  "target_industries": [
+    "B2B SaaS",
+    "Developer Tools",
+    "Fintech"
+  ],
+  "excluded_industries": [
+    "Gambling",
+    "Defense"
+  ],
+  "work_arrangement": [
+    "remote",
+    "hybrid"
+  ],
+  "target_company_stages": [
+    "Series B",
+    "Series C",
+    "growth"
+  ],
   "open_to_ic_and_management": true,
   "job_search_urgency": "active",
   "total_years_experience": 9,
@@ -14,38 +32,41 @@
   "current_level": "Senior PM",
   "highest_level_held": "Senior PM",
   "leveling_trajectory": "IC to Senior IC",
-  "has_management_experience": true,
   "years_managing": 2,
   "largest_team_managed": 4,
-  "has_director_or_above_experience": false,
   "primary_domain": "B2B SaaS",
-  "secondary_domains": ["Developer Tools", "Data Infrastructure"],
-  "domain_years": {"B2B SaaS": 6, "Developer Tools": 3},
-  "worked_at_company_stages": ["Seed", "Series A", "Series B", "Series C"],
-  "has_enterprise_experience": true,
-  "has_smb_experience": false,
-  "has_consumer_experience": false,
-  "has_0_to_1_experience": true,
-  "has_scaling_experience": true,
-  "has_platform_product_experience": true,
-  "has_growth_experience": false,
-  "can_read_code": true,
-  "can_write_code": true,
-  "coding_languages": ["Python", "SQL", "JavaScript"],
+  "secondary_domains": [
+    "Developer Tools",
+    "Data Infrastructure"
+  ],
+  "domain_years": {
+    "B2B SaaS": 6,
+    "Developer Tools": 3
+  },
+  "worked_at_company_stages": [
+    "Seed",
+    "Series A",
+    "Series B",
+    "Series C"
+  ],
+  "coding_languages": [
+    "Python",
+    "SQL",
+    "JavaScript"
+  ],
   "technical_background": "CS degree + 2 years SWE before PM",
-  "comfortable_with_data": true,
-  "data_tools": ["Looker", "Amplitude", "BigQuery", "dbt"],
-  "has_worked_embedded_with_engineering": true,
-  "has_written_technical_specs": true,
+  "data_tools": [
+    "Looker",
+    "Amplitude",
+    "BigQuery",
+    "dbt"
+  ],
   "familiarity_with_apis": "high",
-  "product_areas": ["core product", "platform", "developer experience"],
-  "strong_in_discovery": true,
-  "strong_in_delivery": true,
-  "strong_in_strategy": true,
-  "strong_in_growth": false,
-  "has_pricing_experience": false,
-  "has_internationalization_experience": true,
-  "has_launched_products": true,
+  "product_areas": [
+    "core product",
+    "platform",
+    "developer experience"
+  ],
   "notable_launches": [
     {
       "description": "Led 0-to-1 launch of self-serve onboarding flow",
@@ -62,32 +83,166 @@
   "smallest_company_size": 12,
   "largest_arr_supported": "$40M",
   "largest_dau_supported": 85000,
-  "has_owned_revenue_metric": true,
-  "has_owned_retention_metric": true,
-  "cross_functional_scope": ["Engineering", "Design", "Data", "Marketing", "Sales"],
-  "has_worked_with_sales": true,
-  "has_worked_with_legal_compliance": false,
-  "budget_ownership": false,
-  "vendor_management": false,
+  "cross_functional_scope": [
+    "Engineering",
+    "Design",
+    "Data",
+    "Marketing",
+    "Sales"
+  ],
   "highest_degree": "BS",
   "degree_field": "Computer Science",
   "university_tier": "state school",
-  "has_mba": false,
   "certifications": [],
-  "has_published_work": false,
-  "has_conference_speaking": false,
-  "has_notable_side_projects": true,
   "country": "US",
   "work_authorization": "citizen",
   "requires_sponsorship": false,
   "willing_to_relocate": false,
   "current_location": "Portland, OR",
   "timezone": "PT",
-  "communication_artifacts": ["PRDs", "strategy docs", "roadmaps"],
+  "communication_artifacts": [
+    "PRDs",
+    "strategy docs",
+    "roadmaps"
+  ],
   "stakeholder_management_level": "VP and below",
-  "has_exec_exposure": true,
   "presentation_experience": "regular internal, occasional external",
   "written_communication_strength": "high",
-  "self_assessed_strengths": ["discovery", "technical depth", "cross-functional alignment"],
-  "self_assessed_gaps": []
+  "self_assessed_strengths": [
+    "discovery",
+    "technical depth",
+    "cross-functional alignment"
+  ],
+  "self_assessed_gaps": [],
+  "skills": [
+    {
+      "name": "platform product management",
+      "confirmed": true
+    },
+    {
+      "name": "pricing and packaging",
+      "confirmed": false
+    },
+    {
+      "name": "growth experimentation",
+      "confirmed": false
+    },
+    {
+      "name": "0 to 1 product development",
+      "confirmed": true
+    },
+    {
+      "name": "revenue metric ownership",
+      "confirmed": true
+    },
+    {
+      "name": "retention metric ownership",
+      "confirmed": true
+    },
+    {
+      "name": "sales-assisted GTM",
+      "confirmed": true
+    },
+    {
+      "name": "enterprise product management",
+      "confirmed": true
+    },
+    {
+      "name": "scaling existing products",
+      "confirmed": true
+    },
+    {
+      "name": "people management",
+      "confirmed": true
+    },
+    {
+      "name": "software development",
+      "confirmed": true
+    },
+    {
+      "name": "data analysis",
+      "confirmed": true
+    },
+    {
+      "name": "consumer product management",
+      "confirmed": false
+    },
+    {
+      "name": "SMB product management",
+      "confirmed": false
+    },
+    {
+      "name": "director or above leadership",
+      "confirmed": false
+    },
+    {
+      "name": "product launches",
+      "confirmed": true
+    },
+    {
+      "name": "legal and compliance",
+      "confirmed": false
+    },
+    {
+      "name": "budget ownership",
+      "confirmed": false
+    },
+    {
+      "name": "vendor management",
+      "confirmed": false
+    },
+    {
+      "name": "MBA",
+      "confirmed": false
+    },
+    {
+      "name": "published work",
+      "confirmed": false
+    },
+    {
+      "name": "conference speaking",
+      "confirmed": false
+    },
+    {
+      "name": "notable side projects",
+      "confirmed": true
+    },
+    {
+      "name": "executive exposure",
+      "confirmed": true
+    },
+    {
+      "name": "product discovery",
+      "confirmed": true
+    },
+    {
+      "name": "product delivery",
+      "confirmed": true
+    },
+    {
+      "name": "product strategy",
+      "confirmed": true
+    },
+    {
+      "name": "growth strategy",
+      "confirmed": false
+    },
+    {
+      "name": "internationalization",
+      "confirmed": true
+    },
+    {
+      "name": "embedded engineering partnership",
+      "confirmed": true
+    },
+    {
+      "name": "technical specification writing",
+      "confirmed": true
+    },
+    {
+      "name": "code reading",
+      "confirmed": true
+    }
+  ],
+  "unanswered_skills": []
 }
