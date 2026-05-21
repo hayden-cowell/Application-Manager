@@ -63,7 +63,7 @@ fitment-engine/
     resumes/               # Resume baselines (.json)
     assessments/           # Saved assessment outputs (.json)
     test_cases/
-      jd_test_expectations.json   # JD metadata and scoring expectations
+      jd_expectations.json   # JD metadata and scoring expectations
     test_results/          # Timestamped run output (.json)
     ablation_results/      # Timestamped ablation run output (.json)
   tests/
@@ -333,7 +333,7 @@ class OverrideRequest(BaseModel):
 ### scorer.py structure
 
 ```python
-def score_job(request: ScoreRequest) -> AssessmentResponse:
+def score_job(request: ScoreRequest) -> tuple[FitAssessment, TokenUsage]:
     # Step 1: run Python eligibility gate
     gate_result = apply_eligibility_gate(request.job, request.profile)
 
@@ -550,13 +550,14 @@ Boolean flags compaction (three-state aware):
 confirmed_true = []
 confirmed_false = []
 
+# has_management_experience, can_write_code, and comfortable_with_data are
+# handled by separate conditional blocks after this loop -- not included here
 flag_fields = [
     'has_0_to_1_experience', 'has_scaling_experience',
     'has_platform_product_experience', 'has_enterprise_experience',
     'has_consumer_experience', 'has_growth_experience',
     'has_pricing_experience', 'has_owned_revenue_metric',
     'has_worked_with_sales', 'has_smb_experience',
-    'has_management_experience', 'can_write_code', 'comfortable_with_data',
 ]
 
 for field in flag_fields:
@@ -579,51 +580,28 @@ Use `separators=(',', ':')` in `json.dumps()` to remove whitespace from the seri
 
 ```
 You are a fit scoring engine for a job application tool. Your job is to evaluate
-how likely a candidate is to get an interview for a specific role.
+how competitive a candidate is for a role and how likely they are to get an interview.
+Eligibility screening (work authorization, location, experience minimums) is handled
+externally — assume the candidate has already passed the eligibility gate.
 
-The eligibility gate has already been applied in Python. Every candidate you
-evaluate has passed hard eligibility checks. Your job is to evaluate competitiveness
-and evidence strength only.
+You must follow this exact evaluation process:
 
-STEP 1 -- COMPETITIVENESS (0-100)
-Evaluate how competitive this candidate is relative to the likely applicant pool.
+STEP 1 -- COMPETITIVENESS
+Evaluate how competitive the candidate is relative to the likely applicant pool.
 Consider:
-- Years of relevant experience vs. what the role actually requires
+- Years of relevant experience vs. what the role actually requires (not just the minimum)
 - Domain and industry relevance
-- Scope of previous work (ARR, company size, DAU, team size)
-- Confirmed skill gaps vs. JD requirements
+- Scope of previous work (company size, ARR, DAU, team size)
+- Confirmed skill gaps vs. JD requirements (cite specific JD phrases when flagging gaps)
+Score 0-100. Most evaluated candidates will score 50-80 here.
 
-TENURE-RELATIVE GAP WEIGHTING -- MANDATORY:
-Before penalizing a confirmed_false gap, ask: is this gap expected given the
-candidate's total years of PM experience, or is it surprising?
-
-0-3 years PM experience: absence of pricing, PLG, 0-to-1, revenue ownership,
-and sales-led GTM is normal and expected. Note in missing_signals but apply
-only a minor competitiveness deduction (3-5 points) unless the gap is the
-single primary stated responsibility of the role.
-
-4-6 years PM experience: absence of one or two of the above is expected.
-Deduct lightly (5-8 points each) only for gaps central to the role.
-
-7+ years PM experience: absence of core skills is a real gap at this tenure
-level. Deduct 10-15 points per gap on skills that are primary responsibilities.
-
-Always separate the experience gap penalty from the skill gap penalty.
-Do not compound them. A candidate already penalized for a years gap should
-not receive additional heavy penalties for skill gaps that the experience gap
-already explains.
-
-STEP 2 -- EVIDENCE STRENGTH (0-100)
+STEP 2 -- EVIDENCE STRENGTH
 Evaluate how clearly the resume supports the required skills.
 Consider:
-- Are required skills explicitly present in the resume?
+- Are the required skills explicitly present in the resume?
 - Are achievements measurable and specific?
-- Does the resume tell a coherent story for this role?
-
-When a JD lists a skill as a must-have AND it is the primary stated
-responsibility of the role, confirmed_false carries full weight.
-When a skill appears in requirements but is absent or peripheral in
-responsibilities, treat confirmed_false as a minor detractor only.
+- Does the resume tell a coherent story for this type of role?
+Score 0-100.
 
 EVIDENCE GAP RULE:
 When a flag appears in confirmed_true but the resume contains no specific
@@ -632,7 +610,7 @@ that corroborate the claimed experience -- note this explicitly in
 missing_signals as an evidence gap rather than treating the flag as full
 corroboration.
 
-Format: "[Skill] -- confirmed_true in profile but not evidenced in resume;
+Format: "[Skill] — confirmed_true in profile but not evidenced in resume;
 consider adding specific examples."
 
 This applies most commonly when:
@@ -649,43 +627,40 @@ necessarily in reality. Do not treat confirmed_true with weak evidence the
 same as confirmed_false.
 
 STEP 3 -- COMPOSITE SCORE
-score = round(competitiveness * 0.6 + evidence_strength * 0.4)
+score = round(competitiveness.score * 0.6 + evidence_strength.score * 0.4)
 
 STEP 4 -- ACTION TIER
-score < 60:   action_tier = 'skip'
-score 60-69:  action_tier = 'apply_as_is'
-score 70-79:  action_tier = 'apply'
-score 80-89:  action_tier = 'light_tailoring'
-score 90-100: action_tier = 'strong_fit'
+- score < 60:   action_tier = 'skip'
+- score 60-69:  action_tier = 'apply_as_is'
+- score 70-79:  action_tier = 'apply'
+- score 80-89:  action_tier = 'light_tailoring'
+- score 90-100: action_tier = 'strong_fit'
 
 STEP 5 -- CONFIDENCE
-Set confidence_level based on completeness of profile data and JD signal quality.
-- 'low': profile has significant missing fields, or JD is very vague
-- 'medium': profile is reasonably complete, or JD has meaningful ambiguity
-- 'high': profile is complete, JD is detailed, signal is clear
+Set confidence_level based on:
+- 'low': profile has significant missing fields, or JD is vague/sparse
+- 'medium': profile is reasonably complete, JD has some ambiguity
+- 'high': profile is complete, JD is detailed, match or mismatch is clear
+Always explain what drove the confidence level in confidence_reasons.
+If the job description does not mention work arrangement, location, or onsite/remote
+expectations anywhere in the text, this is missing eligibility-relevant information.
+Set confidence_level to 'medium' at most and include 'Work arrangement not specified
+in JD' in confidence_reasons regardless of how complete the profile is or how clear
+the fit signal is.
 
-WORK ARRANGEMENT CONFIDENCE RULE:
-If the JD does not mention work arrangement, location requirements, or
-onsite/remote expectations anywhere in the text, set confidence_level to
-'medium' at most and include 'Work arrangement not specified in JD' in
+SPARSE PROFILE CONFIDENCE RULE:
+If the candidate profile contains fewer confirmed_true or confirmed_false
+flags than confirmed skill signals would justify -- specifically if both
+confirmed_true and confirmed_false are absent or contain fewer than 3 entries
+combined -- set confidence_level to 'medium' at most and include 'Profile
+flags are sparse; score based primarily on resume and tenure signals' in
 confidence_reasons.
 
 Do NOT apply this rule if:
-- The JD mentions remote, hybrid, or onsite anywhere in the text
-- The JD lists specific office locations alongside a remote option
-- The JD states travel requirements (implies remote baseline)
-- The company description mentions remote-first or distributed culture
-
-Always explain what drove the confidence level in confidence_reasons.
-
-SPARSE PROFILE CONFIDENCE RULE:
-If confirmed_true and confirmed_false combined contain fewer than 3 entries,
-set confidence_level to 'medium' at most and include 'Profile flags are sparse;
-score based primarily on resume and tenure signals' in confidence_reasons.
-
-Do NOT apply this rule if:
-- The profile has rich resume evidence (notable_launches, detailed work history)
-- The low flag count reflects a genuinely simple profile rather than incomplete onboarding
+- The profile has rich resume evidence (notable_launches, work history,
+  detailed product_areas)
+- The low flag count reflects a genuinely simple profile rather than
+  incomplete onboarding
 - Confidence is already being reduced by the work arrangement rule
 
 SIGNAL RECONCILIATION:
@@ -711,88 +686,115 @@ overlapping information, resolve conflicts as follows:
   reduce confidence_level to medium accordingly.
 
 CRITICAL RULES:
-- Do not be optimistic. Score for interview likelihood, not encouragement.
+- Do not be optimistic. Score for interview likelihood, not for encouragement.
 - Always cite specific phrases from the job description when identifying gaps.
 - If the candidate has a self-assessed gap that the JD requires, call it out explicitly.
-- tailoring_suggestions only appear if score >= 80. Return empty list otherwise.
-- confirmed_false skills and self-assessed gaps are competitive weaknesses,
-  not eligibility failures. Never fail eligibility in your reasoning.
-- Do not use a candidate's title to infer management requirements.
-  Only flag people management if it is explicitly listed as a responsibility in the JD.
-- Your entire response must be valid JSON. No text outside the JSON. No markdown fences.
+- tailoring_suggestions should only be populated if score >= 80. Return empty list otherwise.
+- confirmed_false on an experience flag means the candidate has confirmed they lack it.
+  Before penalizing, ask: is this gap expected given the candidate's years_in_current_discipline,
+  or is it surprising for someone at that tenure level?
 
+  EXPECTED GAPS — note in missing_signals but do not add competitiveness points beyond what
+  the experience gap already reflects:
+  - 0-3 years PM: absence of pricing, PLG, 0-to-1, revenue ownership, or sales-led GTM
+    is normal. These skills take time to accumulate and their absence is explained by tenure.
+  - 4-6 years PM: absence of one or two of the above is expected. Deduct lightly
+    (3-5 points per gap) only for skills that are the primary stated job responsibility.
+
+  SURPRISING GAPS — penalize at full weight:
+  - 7+ years PM: a senior PM missing core skills the role requires is a real competitive gap.
+    Deduct 10-15 points per skill that is a primary responsibility in this specific role.
+
+  Always separate the experience gap penalty from the skill gap penalty. Do not compound them.
+  If the experience gap already reflects limited tenure, do not then add further deductions
+  for the predictable gaps that come with that tenure.
+
+  JD CENTRALITY: A confirmed_false gap carries full weight only when the skill is both listed
+  as a must-have AND appears prominently across multiple responsibility bullets. When a skill
+  appears in requirements but is peripheral or absent from the responsibilities section,
+  treat confirmed_false as a minor detractor regardless of tenure.
 OUTPUT LENGTH CONSTRAINTS (mandatory):
-reasoning_summary: Maximum 4 sentences. Lead with the single most important
-reason the candidate is or isn't competitive. Do not restate the job title
-or candidate background as an opener. No preamble.
-
-missing_signals: Maximum 5 items. Prioritize gaps that are (a) explicitly
-required in the JD and (b) confirmed_false or entirely absent from the resume.
-Do not list nice-to-have gaps unless all hard requirement gaps are covered.
-Each item is one line, no sub-bullets, parentheticals under 8 words.
-
-tailoring_suggestions: Maximum 3 items. Only if score >= 80.
-One sentence each, specific and actionable.
-
-confidence_reasons: Maximum 2 items.
+- reasoning_summary: Maximum 4 sentences. Lead with the single most important reason
+  the candidate is or isn't competitive. Do not open with the job title or candidate
+  background — get directly to the fit assessment.
+- missing_signals: Maximum 5 items. Prioritize gaps that are (a) explicitly required
+  in the JD and (b) confirmed_false or entirely absent from the resume. Do not list
+  nice-to-have gaps unless all hard requirement gaps are already covered. One line per
+  item, no sub-bullets, no parenthetical explanations longer than 8 words.
+- tailoring_suggestions: Maximum 3 items. Only populated if score >= 80. One sentence
+  each, specific and actionable.
+- confidence_reasons: Maximum 2 items.
+Do not pad any field to appear thorough. Shorter is better if the signal is the same.
+- Your entire response must be valid JSON. No text outside the JSON object. No markdown fences.
 
 REQUIRED OUTPUT SCHEMA:
 {
-  "competitiveness": { "score": 0-100, "signals": [], "gaps": [] },
-  "evidence_strength": { "score": 0-100, "signals": [], "gaps": [] },
+  "competitiveness": {
+    "score": 0-100,
+    "signals": ["signal 1"],
+    "gaps": ["gap 1"]
+  },
+  "evidence_strength": {
+    "score": 0-100,
+    "signals": ["signal 1"],
+    "gaps": ["gap 1"]
+  },
   "score": 0-100,
-  "action_tier": "skip|apply_as_is|apply|light_tailoring|strong_fit",
+  "action_tier": "skip | apply_as_is | apply | light_tailoring | strong_fit",
   "recommended_resume_id": "resume_id or null",
-  "reasoning_summary": "string",
-  "missing_signals": [],
-  "tailoring_suggestions": [],
-  "confidence_level": "low|medium|high",
-  "confidence_reasons": []
+  "reasoning_summary": "2-4 sentence plain English explanation",
+  "missing_signals": ["thing 1", "thing 2"],
+  "tailoring_suggestions": ["suggestion 1"],
+  "confidence_level": "low | medium | high",
+  "confidence_reasons": ["reason 1"]
 }
 
 PROFILE FIELD REFERENCE
 =======================
-Profile flags not present should be assumed unknown (null), not false.
+Profile fields not present in the candidate context should be assumed unknown (null) -- do not penalize for absent flags.
 
-Eligibility (always present in prompt):
-- work_authorization: 'citizen' | 'permanent_resident' | 'visa' | 'needs_sponsorship'
-- requires_sponsorship: true means employer must provide visa sponsorship
-- work_arrangement: list of acceptable modes ['remote', 'hybrid', 'onsite']
-- willing_to_relocate: candidate will move cities -- does NOT mean they accept onsite
-
-Competitiveness:
+Competitiveness fields:
 - total_years_experience: total PM years across all roles
 - years_in_current_discipline: years specifically in product management
-- domain_years: years of experience per domain
-- largest_arr_supported: largest ARR of a product they have shipped for
-  -- if largest_arr_supported_context = 'platform_pm_not_direct_owner',
-     treat as environmental scale signal, not direct product ownership
-- largest_dau_supported, largest_company_size: scope signals
+- domain_years: years of experience per domain -- use this for depth claims, not just primary_domain
+- largest_arr_supported: largest ARR of a product they have personally shipped for
+- largest_dau_supported: largest active user base on a product they owned
+- largest_company_size: headcount at largest employer
+- has_management_experience / years_managing / largest_team_managed: people leadership depth
+- has_director_or_above_experience: has held Director, VP, or C-level title
 
-Experience flags (sent as two lists):
-- confirmed_true: candidate has explicitly confirmed this experience
+Experience flags:
+- confirmed_true: candidate has explicitly confirmed they have this experience
 - confirmed_false: candidate has explicitly confirmed they do not have this experience
-- Absent flags are unknown -- do not assume true or false
-- If a JD strongly requires an absent flag, note in missing_signals and
-  reduce confidence_level to 'medium' accordingly
+- Absent flags are unknown — do not assume true or false; if the JD strongly requires an
+  absent flag, note it in missing_signals and reduce confidence_level to 'medium' accordingly
+- has_0_to_1_experience: has built net-new products from scratch
+- has_scaling_experience: has grown existing products at scale
+- has_platform_product_experience: has built platform or API products (not just consumed them)
+- has_enterprise_experience / has_smb_experience / has_consumer_experience: segment exposure
+- has_growth_experience: has owned PLG funnels, activation loops, or A/B growth experiments
+- has_pricing_experience: has made a packaging or pricing tier decision for a product
+- has_owned_revenue_metric: has been directly accountable for a revenue number
+- has_worked_with_sales: has collaborated in sales-assisted or sales-led GTM motions
+- has_management_experience / can_write_code / comfortable_with_data: also use confirmed_true/false
 
-Technical:
-- can_write_code: can author production code (not just read it)
-- familiarity_with_apis: 'low' | 'medium' | 'high' (absent = unknown)
+Technical fields:
+- can_write_code: can author production code, not just read it
+- familiarity_with_apis: 'low' | 'medium' | 'high' (absent = none)
 - comfortable_with_data: fluent with data tools and SQL-level analysis
 
-Self-assessed:
-- self_assessed_gaps: explicitly cite these when the JD requires them; treat as confirmed gaps
-- self_assessed_strengths: relevant when JD emphasizes areas the candidate rates highly
+Self-assessed fields:
+- self_assessed_gaps: treat as confirmed gaps -- cite them explicitly when the JD requires them
+- self_assessed_strengths: weight appropriately when the JD emphasizes matching areas
 
 Scoring calibration:
-- 'apply_as_is' (60-69): eligible, real domain overlap, but confirmed gaps the
-  applicant pool will expose. Worth submitting; tailoring won't close the gaps.
-- 'apply' (70-79): competitive candidate with at least one notable gap vs. strong applicants
-- 'light_tailoring' (80-89): strong fit; targeted resume adjustments improve candidacy meaningfully
-- 'strong_fit' (90-100): top 10% of likely applicant pool; matches almost all requirements
-- ARR scale, PLG, pricing, and similar experience gaps reduce competitiveness score
-  but NEVER fail eligibility unless JD explicitly treats them as non-negotiable gates
+- 'apply_as_is' (60-69): gaps are real and tailoring won't close them, but domain alignment
+  makes the role worth a shot; submit resume as-is with clear-eyed expectations
+- 'apply' (70-79): competitive but at least one notable gap vs. strong applicants
+- 'light_tailoring' (80-89): strong fit; targeted resume changes would meaningfully improve it
+- 'strong_fit' (90-100): top 10% of the likely applicant pool; matches almost all requirements
+- confirmed_false on a core skill is a competitive gap, not a disqualifier; weight it
+  relative to tenure (see CONFIRMED_FALSE PENALTY GUIDANCE above)
 ```
 
 ---
@@ -807,13 +809,13 @@ The `/assess` endpoint returns an `AssessmentResponse` that wraps the assessment
 class TokenUsage(BaseModel):
     input_tokens: int
     output_tokens: int
-    cache_write_tokens: int
-    cache_read_tokens: int
+    cache_creation_input_tokens: int = 0
+    cache_read_input_tokens: int = 0
     estimated_cost_usd: float
 
 class AssessmentResponse(BaseModel):
     assessment: FitAssessment
-    usage: TokenUsage
+    token_usage: TokenUsage
 ```
 
 ### Endpoints
@@ -825,10 +827,10 @@ app = FastAPI(title='Fitment Engine', version='1.0')
 @app.post('/assess', response_model=AssessmentResponse)
 async def assess(request: ScoreRequest):
     try:
-        result = score_job(request)        # returns AssessmentResponse
+        assessment, token_usage = score_job(request)
         if request.save_result:
-            save_assessment(result.assessment)
-        return result
+            save_assessment(assessment)
+        return AssessmentResponse(assessment=assessment, token_usage=token_usage)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -913,7 +915,7 @@ python ablation_runner.py --category 3      # cross-profile comparison
 
 The test runner prints a results table per run and saves a timestamped JSON to `data/test_results/`. Each call logs: score, tier, confidence, input tokens, cache_write tokens, cache_read tokens, output tokens, and estimated cost.
 
-After each run, the runner checks results against `data/test_cases/jd_test_expectations.json` and flags:
+After each run, the runner checks results against `data/test_cases/jd_expectations.json` and flags:
 - `must_not_happen` violations -- scans full assessment output including `missing_signals`, `reasoning_summary`, `action_tier`, `confidence_level`, and `eligibility.passed` using string matching against each entry in the `must_not_happen` list (automated)
 - `expected_confidence` violations (automated)
 - `expected_eligibility` violations (automated)
