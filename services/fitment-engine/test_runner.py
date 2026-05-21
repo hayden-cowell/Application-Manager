@@ -15,6 +15,13 @@ BASE_URL = 'http://localhost:8000'
 EXPECTATIONS_PATH = Path('data/test_cases/jd_expectations.json')
 RESULTS_DIR = Path('data/test_results')
 
+PROFILE_RESUME_MAP = {
+    'profile_hayden_cowell': 'resume_hayden_cowell_platform_pm',
+    'profile_senior_pm': 'resume_platform_pm',
+    'profile_midcareer_pm': 'resume_midcareer_pm_generalist',
+    'profile_senior_tpm': 'resume_senior_tpm',
+}
+
 
 def load_expectations() -> dict:
     if EXPECTATIONS_PATH.exists():
@@ -72,7 +79,7 @@ def check_expectations(job_id: str, result: dict, expectations: dict) -> list[st
 def run(profile_filter: str | None, job_filter: str | None):
     profiles = {p.stem: json.loads(p.read_text()) for p in Path('data/profiles').glob('*.json')}
     jobs     = {j.stem: json.loads(j.read_text()) for j in Path('data/jobs').glob('*.json')}
-    resumes  = [json.loads(r.read_text()) for r in Path('data/resumes').glob('*.json')]
+    resumes  = {r.stem: json.loads(r.read_text()) for r in Path('data/resumes').glob('*.json')}
     expectations = load_expectations()
 
     if profile_filter:
@@ -91,10 +98,15 @@ def run(profile_filter: str | None, job_filter: str | None):
             label = f'{profile_id} x {job_id}'
             print(f'\n--- {label} ---')
             try:
+                resume_id = PROFILE_RESUME_MAP.get(profile_id)
+                resumes_for_profile = (
+                    [resumes[resume_id]] if resume_id and resume_id in resumes
+                    else list(resumes.values())
+                )
                 resp = httpx.post(f'{BASE_URL}/assess', json={
                     'job': job,
                     'profile': profile,
-                    'resumes': resumes,
+                    'resumes': resumes_for_profile,
                     'save_result': True
                 }, timeout=60)
                 resp.raise_for_status()
