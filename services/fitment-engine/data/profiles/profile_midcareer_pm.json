@@ -1,0 +1,152 @@
+{
+  "profile_id": "profile_midcareer_pm",
+  "profile_version": 1,
+  "onboarding_complete": true,
+  "target_roles": [
+    "Product Manager",
+    "Senior Product Manager",
+    "Group Product Manager"
+  ],
+  "target_industries": [
+    "B2B SaaS",
+    "Consumer"
+  ],
+  "excluded_industries": [],
+  "work_arrangement": [
+    "remote",
+    "hybrid"
+  ],
+  "target_company_stages": [
+    "series_a",
+    "series_b",
+    "series_c",
+    "growth",
+    "public"
+  ],
+  "open_to_ic_and_management": true,
+  "job_search_urgency": "active",
+  "total_years_experience": 12,
+  "years_in_current_discipline": 8,
+  "current_level": "Product Manager",
+  "highest_level_held": "Product Manager",
+  "leveling_trajectory": "Operations Analyst to Junior PM to APM to PM",
+  "has_management_experience": true,
+  "years_managing": 4,
+  "largest_team_managed": 15,
+  "has_director_or_above_experience": false,
+  "primary_domain": "B2B SaaS",
+  "secondary_domains": [
+    "Consumer",
+    "SMB"
+  ],
+  "domain_years": {
+    "B2B SaaS": 5,
+    "Consumer": 4,
+    "SMB": 3
+  },
+  "worked_at_company_stages": [
+    "series_b",
+    "growth",
+    "public"
+  ],
+  "has_enterprise_experience": true,
+  "has_smb_experience": true,
+  "has_consumer_experience": true,
+  "has_0_to_1_experience": false,
+  "has_scaling_experience": true,
+  "has_platform_product_experience": false,
+  "has_growth_experience": true,
+  "has_pricing_experience": true,
+  "can_read_code": true,
+  "can_write_code": false,
+  "coding_languages": [
+    "Python"
+  ],
+  "technical_background": "Computer Engineering degree; operations analyst background; familiar with Python and data viz tools",
+  "comfortable_with_data": true,
+  "data_tools": [
+    "Tableau",
+    "Python"
+  ],
+  "has_worked_embedded_with_engineering": true,
+  "has_written_technical_specs": true,
+  "familiarity_with_apis": "low",
+  "product_areas": [
+    "conversion optimization",
+    "enterprise integrations",
+    "pricing",
+    "user experience"
+  ],
+  "strong_in_discovery": true,
+  "strong_in_delivery": true,
+  "strong_in_strategy": true,
+  "strong_in_growth": true,
+  "has_internationalization_experience": true,
+  "has_launched_products": true,
+  "notable_launches": [
+    {
+      "description": "Led team to solve number one cause of customer complaints, completed six months ahead of schedule",
+      "impact": "Resolved top customer complaint driver; delivered ahead of schedule"
+    },
+    {
+      "description": "Spearheaded three-tiered pricing restructure based on consumer willingness to pay",
+      "impact": "Increased average sale 35% and margin 12%"
+    },
+    {
+      "description": "Oversaw integration of external technology solution leading 5 developers and 9 testers",
+      "impact": "Resulted in additional $1MM of sales"
+    }
+  ],
+  "design_collaboration_depth": "high",
+  "research_experience": "high",
+  "largest_company_size": null,
+  "smallest_company_size": null,
+  "largest_arr_supported": null,
+  "largest_arr_supported_context": null,
+  "largest_dau_supported": null,
+  "has_owned_revenue_metric": true,
+  "has_owned_retention_metric": true,
+  "cross_functional_scope": [
+    "Engineering",
+    "Design",
+    "QA",
+    "Business",
+    "Operations"
+  ],
+  "has_worked_with_sales": true,
+  "has_worked_with_legal_compliance": null,
+  "budget_ownership": null,
+  "vendor_management": true,
+  "highest_degree": "BS",
+  "degree_field": "Computer Engineering",
+  "university_tier": null,
+  "has_mba": false,
+  "certifications": [],
+  "has_published_work": false,
+  "has_conference_speaking": true,
+  "has_notable_side_projects": false,
+  "country": "US",
+  "work_authorization": "citizen",
+  "requires_sponsorship": false,
+  "willing_to_relocate": false,
+  "current_location": "Bay Area, CA",
+  "timezone": "PT",
+  "communication_artifacts": [
+    "PRDs",
+    "roadmaps",
+    "business cases"
+  ],
+  "stakeholder_management_level": "VP and below",
+  "has_exec_exposure": true,
+  "presentation_experience": "regular internal, occasional external (conference organizer)",
+  "written_communication_strength": "high",
+  "self_assessed_strengths": [
+    "conversion optimization",
+    "pricing strategy",
+    "cross-functional team leadership",
+    "user research",
+    "delivery"
+  ],
+  "self_assessed_gaps": [
+  ]
+}

@@ -56,6 +56,7 @@ fitment-engine/
   schemas.py               # Pydantic models for all data structures
   storage.py               # JSON file read/write layer
   test_runner.py           # CLI batch test harness
+  ablation_runner.py       # Controlled ablation test harness
   data/
     profiles/              # User profiles (.json)
     jobs/                  # Job postings (.json)
@@ -64,6 +65,7 @@ fitment-engine/
     test_cases/
       jd_test_expectations.json   # JD metadata and scoring expectations
     test_results/          # Timestamped run output (.json)
+    ablation_results/      # Timestamped ablation run output (.json)
   tests/
     test_scorer.py         # Unit tests for scoring and eligibility logic
     test_api.py            # Integration tests for API endpoints
@@ -91,7 +93,7 @@ httpx>=0.27.0
 # .env.example
 ANTHROPIC_API_KEY=your_key_here
 MODEL=claude-sonnet-4-6
-PROMPT_VERSION=1.2
+PROMPT_VERSION=1.4
 STORAGE_PATH=data/assessments
 ```
 
@@ -222,6 +224,15 @@ class UserProfile(BaseModel):
     presentation_experience: Optional[str] = None
     written_communication_strength: Optional[str] = None  # 'low', 'medium', 'high'
     self_assessed_strengths: list[str] = []
+
+    # self_assessed_gaps: free-form weaknesses the candidate volunteers.
+    # Must NOT duplicate fields already captured by confirmed_false flags --
+    # use only for nuanced gaps that do not map to a boolean flag
+    # (e.g. "executive storytelling", "regulated industry experience").
+    # Duplication causes self_assessed_gaps to override the null state of
+    # boolean flags, collapsing null into false and breaking the three-state
+    # system. The profile builder (Phase 2) should strip self_assessed_gaps
+    # entries that duplicate confirmed_false flags before saving.
     self_assessed_gaps: list[str] = []
 ```
 
@@ -322,7 +333,7 @@ class OverrideRequest(BaseModel):
 ### scorer.py structure
 
 ```python
-def score_job(request: ScoreRequest) -> FitAssessment:
+def score_job(request: ScoreRequest) -> AssessmentResponse:
     # Step 1: run Python eligibility gate
     gate_result = apply_eligibility_gate(request.job, request.profile)
 
@@ -375,6 +386,17 @@ def select_best_resume(job, resumes):
     if with_dates:
         return sorted(with_dates, key=lambda r: r.last_used, reverse=True)[0]
     return resumes[0]
+```
+
+**Note:** `test_runner.py` uses an explicit `PROFILE_RESUME_MAP` to bypass `select_best_resume()` for known profiles. This prevents resume mismatches when multiple resumes with generic role_types are present in `data/resumes/`. Any new profile added to the test suite should have a corresponding entry in `PROFILE_RESUME_MAP`.
+
+```python
+PROFILE_RESUME_MAP = {
+    'profile_hayden_cowell': 'resume_hayden_cowell_platform_pm',
+    'profile_senior_pm': 'resume_platform_pm',
+    'profile_midcareer_pm': 'resume_midcareer_pm_generalist',
+    'profile_senior_tpm': 'resume_senior_tpm',
+}
 ```
 
 ---
@@ -605,13 +627,26 @@ responsibilities, treat confirmed_false as a minor detractor only.
 
 EVIDENCE GAP RULE:
 When a flag appears in confirmed_true but the resume contains no specific
-evidence supporting it, note this in missing_signals as an evidence gap.
+evidence supporting it -- no relevant achievements, tools, or role descriptions
+that corroborate the claimed experience -- note this explicitly in
+missing_signals as an evidence gap rather than treating the flag as full
+corroboration.
 
-Format: "[Skill] — confirmed_true in profile but not evidenced in resume;
+Format: "[Skill] -- confirmed_true in profile but not evidenced in resume;
 consider adding specific examples."
 
-Weight as a minor competitiveness detractor only. confirmed_true with weak
-resume evidence is not the same as confirmed_false.
+This applies most commonly when:
+- A candidate claims has_platform_product_experience: true but resume shows
+  only consumer or internal tooling work
+- A candidate claims has_growth_experience: true but resume has no
+  experimentation or funnel metrics
+- A candidate claims can_write_code: true but resume has no technical
+  achievements or tool evidence
+
+Weight evidence gaps as minor competitiveness detractors only. The candidate
+has confirmed the experience -- the gap is in resume presentation, not
+necessarily in reality. Do not treat confirmed_true with weak evidence the
+same as confirmed_false.
 
 STEP 3 -- COMPOSITE SCORE
 score = round(competitiveness * 0.6 + evidence_strength * 0.4)
@@ -652,6 +687,28 @@ Do NOT apply this rule if:
 - The profile has rich resume evidence (notable_launches, detailed work history)
 - The low flag count reflects a genuinely simple profile rather than incomplete onboarding
 - Confidence is already being reduced by the work arrangement rule
+
+SIGNAL RECONCILIATION:
+When confirmed_true/confirmed_false flags and self_assessed_gaps contain
+overlapping information, resolve conflicts as follows:
+
+- confirmed_true takes precedence over self_assessed_gaps. If a skill
+  appears in confirmed_true AND in self_assessed_gaps, treat it as
+  confirmed present. The structured flag is a direct answer to a specific
+  question and overrides a general self-assessment.
+
+- confirmed_false is consistent with self_assessed_gaps. If a skill
+  appears in confirmed_false AND in self_assessed_gaps, treat it as
+  confirmed absent. The self_assessed_gap is corroborating evidence.
+
+- If a skill is absent from both confirmed lists but appears in
+  self_assessed_gaps, treat it as confirmed absent for scoring purposes.
+  The candidate has explicitly identified it as a weakness.
+
+- If a skill is absent from all three sources (confirmed_true,
+  confirmed_false, self_assessed_gaps), treat it as unknown. Do not
+  penalize. Note in missing_signals if the JD strongly requires it and
+  reduce confidence_level to medium accordingly.
 
 CRITICAL RULES:
 - Do not be optimistic. Score for interview likelihood, not encouragement.
@@ -843,6 +900,15 @@ python test_runner.py --job job_pm_workos              # all profiles x one job
 python test_runner.py --profile X --job Y              # one profile x one job
 ```
 
+### Ablation runner flags
+
+```bash
+python ablation_runner.py                   # all three categories
+python ablation_runner.py --category 1      # sparse vs. full profile
+python ablation_runner.py --category 2      # flag ablation (three-state validation)
+python ablation_runner.py --category 3      # cross-profile comparison
+```
+
 ### Output
 
 The test runner prints a results table per run and saves a timestamped JSON to `data/test_results/`. Each call logs: score, tier, confidence, input tokens, cache_write tokens, cache_read tokens, output tokens, and estimated cost.
@@ -874,10 +940,27 @@ After each run, the runner checks results against `data/test_cases/jd_test_expec
 
 ### Profiles in test suite
 
-| Profile ID | Description |
-|---|---|
-| profile_hayden_cowell | Real candidate; 3 years PM, platform/data infrastructure, ZoomInfo |
-| profile_senior_pm | Synthetic; 9 years PM, developer tools, B2B SaaS, confirmed gaps in PLG and pricing |
+| Profile ID | Description | Resume |
+|---|---|---|
+| profile_hayden_cowell | Real candidate; 3 years PM, platform/data infrastructure, ZoomInfo | resume_hayden_cowell_platform_pm |
+| profile_senior_pm | Synthetic; 9 years PM, developer tools, B2B SaaS, confirmed gaps in PLG and pricing, has 0-to-1 | resume_platform_pm |
+| profile_midcareer_pm | Synthetic; 8 years PM, B2B SaaS and consumer, confirmed true on PLG/pricing/growth/revenue | resume_midcareer_pm_generalist |
+| profile_senior_tpm | Synthetic; 10 years TPM, cross-functional software delivery, thin resume skills section, confirmed gap in pricing | resume_senior_tpm |
+| profile_hayden_sparse | Sparse variant of Hayden; all Optional flags null, simulates day-one user. Built dynamically in ablation_runner -- no static file. | resume_hayden_cowell_platform_pm |
+
+### Ablation findings summary
+
+Ablation testing (May 2026) produced the following key findings:
+
+**Three-state system is working correctly.** Flags with no self_assessed_gaps overlap show non-zero F-N deltas: `has_0_to_1_experience` showed F-N of -9 on WorkOS, `has_platform_product_experience` showed F-N of -4 on Panorama. Flags without this property (has_growth_experience, has_pricing_experience) showed F-N=0 due to self_assessed_gaps interference -- resolved by the signal reconciliation rule.
+
+**Resume dominates scoring.** Average delta between sparse and full Hayden profile across 15 jobs was only 3 points. The structured profile flags add precision at the margins; the resume text carries the primary scoring signal. This validates the resume-first onboarding approach for Phase 2.
+
+**Flags most impactful on scores:** `has_platform_product_experience` (T-F delta 6-10 on platform roles), `has_0_to_1_experience` (T-F delta 5-9 on roles where it is a must-have), `has_pricing_experience` (T-F delta 10 on monetization roles).
+
+**Cross-profile ranking on job_strong_fit:** Hayden scores above senior_tpm despite less tenure because senior_tpm has `can_write_code: false` and a thin resume -- the job explicitly requires coding ability. This is correct behavior, not a ranking violation.
+
+**1-point score inversions are rounding artifacts.** The composite formula `round(competitiveness * 0.6 + evidence_strength * 0.4)` can produce 1-point differences in either direction when underlying components are nearly identical. Meaningful signal threshold is 3+ points in a consistent direction.
 
 ### Error handling
 
@@ -944,9 +1027,25 @@ The tenure-relative weighting treats confirmed_false gaps as expected or surpris
 
 Ablation testing revealed that self_assessed_gaps overrides the null state of boolean flags. When a skill appears in self_assessed_gaps, the model treats it as confirmed absent regardless of whether the corresponding flag is null (unknown) or false (confirmed). This collapses null into false and breaks the three-state system for any skill mentioned in both places.
 
-The fix has two parts: a signal reconciliation rule in the system prompt that defines explicit precedence (confirmed_true > confirmed_false = self_assessed_gaps > absent from all sources), and a schema convention that self_assessed_gaps should only contain nuanced gaps that do not map to a boolean flag (e.g. "executive storytelling", "regulated industry experience"). The profile builder in Phase 2 should enforce this by stripping self_assessed_gaps entries that duplicate confirmed_false flags before saving.
+Evidence: flags with self_assessed_gaps overlap (has_growth_experience, has_pricing_experience) showed F-N delta = 0 across all tested jobs. Flags without overlap (has_0_to_1_experience, has_platform_product_experience) showed real non-zero F-N deltas.
 
-The original Hayden profile had "pricing and packaging" and "product-led growth" in self_assessed_gaps despite both being captured by has_pricing_experience: false and has_growth_experience: false. This caused F-N delta = 0 for those flags across all tested jobs, while flags without self_assessed_gaps overlap (has_0_to_1_experience, has_platform_product_experience) showed real non-zero F-N deltas, confirming the diagnosis.
+The fix has two parts: a signal reconciliation rule in the system prompt that defines explicit precedence (confirmed_true > confirmed_false = self_assessed_gaps > absent from all sources), and a schema convention that self_assessed_gaps should only contain nuanced gaps that do not map to a boolean flag. The profile builder in Phase 2 should enforce this by stripping self_assessed_gaps entries that duplicate confirmed_false flags before saving.
+
+### Why the evidence gap rule was added
+
+Ablation testing revealed that the scoring engine treated confirmed_true flags as full corroboration even when the resume had no supporting evidence. The senior_tpm profile (confirmed_true on platform and growth experience, thin resume with no specific tools listed) was scoring lower than expected because evidence strength was penalized without a clear signal about why.
+
+The evidence gap rule makes the distinction explicit: confirmed_true with weak resume evidence is not the same as confirmed_false. The gap is in resume presentation, not skill absence. This surfaces as a minor missing_signals note ("consider adding specific examples") rather than a competitiveness penalty, giving users actionable feedback rather than an unexplained score deduction.
+
+### Why test_runner.py uses explicit resume mapping
+
+`select_best_resume()` matches on role_type against job title. When multiple resumes with generic role_types (e.g. "product manager") are present in `data/resumes/`, the wrong resume can be selected for a given profile. This was discovered when Hayden's scores were being calculated against the midcareer PM generalist resume instead of his platform PM resume, producing meaningfully different (and incorrect) assessments.
+
+The `PROFILE_RESUME_MAP` in `test_runner.py` bypasses role_type matching for known profiles, ensuring each profile always uses its correct resume. Any new profile added to the test suite must have a corresponding entry in this map.
+
+### Why self_assessed_gaps overriding null was discovered late
+
+The original test profiles were built with self_assessed_gaps entries that duplicated confirmed_false flags. This masked the three-state system's behavior for those flags throughout initial testing. The issue was only diagnosed during structured ablation testing when F-N deltas were measured explicitly. The fix -- removing duplicate entries from self_assessed_gaps and adding the signal reconciliation rule -- resolved the issue and confirmed the three-state system works correctly for flags without self_assessed_gaps overlap.
 
 ### Why output length is constrained
 
@@ -973,6 +1072,9 @@ python test_runner.py
 # Run single profile
 python test_runner.py --profile profile_hayden_cowell
 
+# Run ablation tests
+python ablation_runner.py --category 2
+
 # API docs (auto-generated)
 http://localhost:8000/docs
 ```
@@ -989,6 +1091,7 @@ Build or update in this order when making changes:
 4. API changes in `main.py` -- endpoints and response models
 5. Storage changes in `storage.py` -- read/write layer
 6. Test suite changes in `test_runner.py` and `data/test_cases/`
+7. Update `PROFILE_RESUME_MAP` in `test_runner.py` when adding new profiles
 
 ### Where you have discretion
 - Internal variable names and helper functions
@@ -1003,6 +1106,7 @@ Build or update in this order when making changes:
 - The action tier thresholds: skip <60, apply_as_is 60-69, apply 70-79, light_tailoring 80-89, strong_fit 90-100
 - The eligibility gate -- five checks only, nothing else; helper functions check both job.description and job.location/job.title as appropriate
 - The three-state boolean compaction logic -- confirmed_true / confirmed_false / null omitted
+- `PROFILE_RESUME_MAP` entries for existing profiles -- do not change without explicit instruction
 
 ### When you are unsure
 Stop and ask before implementing. Do not make assumptions that require a rewrite to fix.

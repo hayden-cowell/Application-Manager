@@ -1,0 +1,73 @@
+{
+  "resume_id": "resume_midcareer_pm_generalist",
+  "name": "Generalist PM",
+  "role_type": "product manager",
+  "version": 1,
+  "last_used": null,
+  "skills": [
+    "Figma", "Sketch", "Python", "Tableau", "Data Visualization",
+    "Conversion Rate Optimization", "Agile Project Management",
+    "Business Analysis", "SDLC", "UserTesting", "InVision",
+    "Pricing Strategy", "Cross-functional Leadership"
+  ],
+  "work_experience": [
+    {
+      "company": "Resume Worded",
+      "title": "Product Manager",
+      "start_date": "2020-01",
+      "end_date": null,
+      "company_size": null,
+      "company_stage": null,
+      "description": "Led conversion optimization and enterprise product development",
+      "key_achievements": [
+        "Proposed solution and built team to solve number one cause of customer complaints, completed six months ahead of schedule",
+        "Reduced development costs by 25% by creating plan to merge related products into one streamlined product",
+        "Oversaw integration of external technology solution leading 5 developers and 9 testers from two companies, resulting in additional $1MM of sales",
+        "Conducted evaluative testing with 10+ participants using InVision and UserTesting.com; synthesized findings which reduced bounce rate for primary user flow by 30%"
+      ],
+      "skills_used": ["Figma", "InVision", "UserTesting", "Agile", "Cross-functional Leadership", "Conversion Rate Optimization"]
+    },
+    {
+      "company": "Growthsi",
+      "title": "Assistant Product Manager",
+      "start_date": "2018-01",
+      "end_date": "2020-01",
+      "company_size": null,
+      "company_stage": null,
+      "description": "Promoted from Junior PM within 18 months due to strong performance",
+      "key_achievements": [
+        "Promoted within 18 months due to strong performance and organizational impact, one year ahead of schedule",
+        "Led transition to paperless practice by implementing electronic booking system; reduced cost of labor by 30% and office overhead by 10%",
+        "Spearheaded major pricing restructure by redirecting focus on consumer willingness to pay; implemented three-tiered pricing model which increased average sale 35% and margin 12%",
+        "Coached 30 summer interns and launched mentorship program for new joiners in Berlin office"
+      ],
+      "skills_used": ["Pricing Strategy", "Business Analysis", "Operations", "Stakeholder Management"]
+    },
+    {
+      "company": "Growthsi",
+      "title": "Junior Project Manager",
+      "start_date": "2016-01",
+      "end_date": "2018-01",
+      "company_size": null,
+      "company_stage": null,
+      "description": "Project management and operations improvement",
+      "key_achievements": [
+        "Supported product and project delivery across cross-functional teams"
+      ],
+      "skills_used": ["Project Management", "Operations", "Business Analysis"]
+    },
+    {
+      "company": "Rofocus",
+      "title": "Operations Analyst",
+      "start_date": "2012-01",
+      "end_date": "2016-01",
+      "company_size": null,
+      "company_stage": null,
+      "description": "Managed redevelopment of internal tracking systems",
+      "key_achievements": [
+        "Managed redevelopment of internal tracking system used by 125 employees, resulting in 20+ new features, 20% reduction in save/load time, and 15% reduction in operation time"
+      ],
+      "skills_used": ["Business Analysis", "Systems Design", "Operations", "SDLC"]
+    }
+  ]
+}

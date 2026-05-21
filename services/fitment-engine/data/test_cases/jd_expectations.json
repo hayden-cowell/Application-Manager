@@ -390,5 +390,44 @@
             "Technical credibility signals ignored or underweighted"
         ]
     }
-  ]
+  ],
+  "profiles": {
+    "profile_hayden_cowell": {
+      "description": "Real candidate. 3 years PM, platform/data infrastructure, ZoomInfo. Technical background (SWE to integration engineer to PM). Confirmed gaps in PLG, pricing, 0-to-1, consumer.",
+      "test_purpose": "Primary real-world baseline. Ground truth validated against Panorama (4 rounds). Use to validate scoring honesty for early-career technical PMs.",
+      "confirmed_false_flags": ["has_growth_experience", "has_pricing_experience", "has_0_to_1_experience", "has_consumer_experience"],
+      "must_score_apply_or_better": ["job_lead_pm_panorama_platform", "job_strong_fit"]
+    },
+    "profile_hayden_sparse": {
+      "description": "Sparse variant of profile_hayden_cowell. All Optional flags set to null. Simulates a day-one user who has completed quick-start onboarding but not answered any follow-up questions.",
+      "test_purpose": "Three-state validation. Scores should be lower than full Hayden profile. Confidence should be medium or low across all jobs. Any high confidence result is a calibration bug. Score should never be lower than zero or higher than full Hayden for the same job.",
+      "must_not_happen": [
+        "confidence_level = high on any job",
+        "Score higher than profile_hayden_cowell on the same job"
+      ]
+    },
+    "profile_senior_pm": {
+      "description": "Synthetic senior PM. 9 years PM, developer tools, B2B SaaS, has 0-to-1 experience. Confirmed gaps in PLG and pricing.",
+      "test_purpose": "Seniority comparison baseline against Hayden. Should score higher on the same jobs due to tenure and 0-to-1 experience. job_strong_fit should score 85+.",
+      "confirmed_false_flags": ["has_growth_experience", "has_pricing_experience"],
+      "confirmed_true_flags": ["has_0_to_1_experience"],
+      "must_score_light_tailoring_or_better": ["job_strong_fit"]
+    },
+    "profile_midcareer_pm": {
+      "description": "Synthetic mid-career PM. 8 years PM, B2B SaaS and consumer, confirmed true on PLG, pricing, growth, and revenue ownership. No platform or developer tools background.",
+      "test_purpose": "Skill flag isolation. Designed to contrast with Hayden on PLG/pricing/growth flags while differing on domain. Score deltas on gap_match and borderline jobs reveal how much those flags move scores.",
+      "confirmed_true_flags": ["has_growth_experience", "has_pricing_experience", "has_owned_revenue_metric", "has_consumer_experience"],
+      "confirmed_false_flags": ["has_platform_product_experience", "has_0_to_1_experience"]
+    },
+    "profile_senior_tpm": {
+      "description": "Synthetic senior TPM. 10 years technical PM, software delivery, confirmed true on platform and growth. Thin resume skills section -- no specific tools listed. Confirmed gap in pricing.",
+      "test_purpose": "Evidence strength and confidence calibration. Resume lacks technical tool evidence despite strong profile claims. Confidence should drop on roles requiring specific technical tools. Tests whether model distinguishes between profile signal and resume evidence.",
+      "confirmed_true_flags": ["has_platform_product_experience", "has_growth_experience", "has_0_to_1_experience"],
+      "confirmed_false_flags": ["has_pricing_experience"],
+      "watch_for": [
+        "Confidence should be medium on technical roles where resume provides no tool evidence",
+        "job_tpm_cloud_platform should surface IaC gap from self_assessed_gaps explicitly"
+      ]
+    }
+  }
 }

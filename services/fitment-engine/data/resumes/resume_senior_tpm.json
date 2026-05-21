@@ -1,0 +1,67 @@
+{
+  "resume_id": "resume_senior_tpm",
+  "name": "Technical PM",
+  "role_type": "technical product manager",
+  "version": 1,
+  "last_used": null,
+  "skills": [
+    "Budgeting",
+    "Resource Allocation",
+    "Cross-functional Team Leadership",
+    "Agile Methodologies",
+    "Market Research",
+    "Data Analysis",
+    "Roadmapping",
+    "User Testing"
+  ],
+  "work_experience": [
+    {
+      "company": "Resume Worded",
+      "title": "Technical Product Manager",
+      "start_date": "2015-01",
+      "end_date": null,
+      "company_size": null,
+      "company_stage": null,
+      "description": "Led cross-functional software product development and data-driven product improvements",
+      "key_achievements": [
+        "Partnered with 20+ cross-functional teams to launch new services that reduced churn rate by 91% in the first year of implementation",
+        "Supervised a team of 50+ developers, designers, and QA engineers to design and launch new products that increased annual revenue by $2.4M",
+        "Conducted market research and analyzed feedback of 2,000+ customers, developing a roadmap that increased CSAT score from 72 to 81",
+        "Performed data analysis and reporting to identify trends and opportunities to improve 12 pilot products",
+        "Initiated marketing campaigns using data analytics to identify user behavior patterns of 10K customers, boosting product usage by 78%"
+      ],
+      "skills_used": ["Cross-functional Leadership", "Data Analysis", "Roadmapping", "Market Research", "Agile", "User Research"]
+    },
+    {
+      "company": "Growthsi",
+      "title": "Product Owner",
+      "start_date": "2013-01",
+      "end_date": "2015-01",
+      "company_size": null,
+      "company_stage": null,
+      "description": "Managed product roadmap and backlog, led cross-functional product delivery",
+      "key_achievements": [
+        "Managed product roadmap and backlog to achieve $180K increase in monthly recurring revenue",
+        "Conducted user testing to identify 20+ key features and prioritize product development, increasing user satisfaction by 77%",
+        "Collaborated with senior developers to deliver successful product launches with 8 cross-functional teams",
+        "Mentored 12 junior Product Owners on agile methodologies and best practices"
+      ],
+      "skills_used": ["Product Roadmapping", "Backlog Management", "User Testing", "Agile", "Stakeholder Management"]
+    },
+    {
+      "company": "Resume Worded Exciting Company",
+      "title": "Business Analyst",
+      "start_date": "2011-01",
+      "end_date": "2013-01",
+      "company_size": null,
+      "company_stage": null,
+      "description": "Requirements gathering and process improvement across high-profile projects",
+      "key_achievements": [
+        "Collaborated with stakeholders to gather requirements and ensure successful implementation of 50+ high-profile projects",
+        "Identified opportunities for process improvements and implemented solutions that reduced manual reporting time by 40%",
+        "Facilitated executive meetings to share insights and recommendations with 30+ key stakeholders"
+      ],
+      "skills_used": ["Business Analysis", "Requirements Gathering", "Stakeholder Management", "Process Improvement"]
+    }
+  ]
+}
