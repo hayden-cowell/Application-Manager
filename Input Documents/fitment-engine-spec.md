@@ -208,6 +208,9 @@ class UserProfile(BaseModel):
     # Skills not yet collected (null / unknown state)
     unanswered_skills: list[str] = []
 
+    # Linked resumes
+    resume_ids: list[str] = []            # ordered list of resume_ids belonging to this profile
+
     # Metadata
     profile_id: str
     profile_version: int = 1
@@ -246,6 +249,7 @@ class ResumeBaseline(BaseModel):
     resume_id: str
     name: str
     role_type: str
+    profile_id: Optional[str] = None      # links this resume to a specific profile; null for unlinked/legacy resumes
     work_experience: list[WorkExperience]
     skills: list[str]
     version: int = 1
@@ -351,30 +355,31 @@ score = round(competitiveness.score * 0.6 + evidence_strength.score * 0.4)
 ### Resume selection (deterministic, not LLM)
 
 ```python
-def select_best_resume(job, resumes):
-    if not resumes:
+def select_best_resume(job, profile, resumes):
+    if not profile.resume_ids:
         return None
-    # Exact role type match first
+
+    # Filter to resumes explicitly linked to this profile
+    profile_resumes = [r for r in resumes if r.resume_id in profile.resume_ids]
+
+    if not profile_resumes:
+        return None
+
+    # Match on role_type against job title
     job_title_lower = job.title.lower()
-    for resume in resumes:
+    for resume in profile_resumes:
         if resume.role_type.lower() in job_title_lower:
             return resume
-    # Fall back to most recently used
-    with_dates = [r for r in resumes if r.last_used]
+
+    # Fall back to most recently used linked resume
+    with_dates = [r for r in profile_resumes if r.last_used]
     if with_dates:
         return sorted(with_dates, key=lambda r: r.last_used, reverse=True)[0]
-    return resumes[0]
+
+    return profile_resumes[0]
 ```
 
-**Note:** `test_runner.py` uses an explicit `PROFILE_RESUME_MAP` to bypass `select_best_resume()` for known profiles. This prevents resume mismatches when multiple resumes with generic role_types are present in `data/resumes/`. Any new profile added to the test suite should have a corresponding entry in `PROFILE_RESUME_MAP`.
-
-```python
-PROFILE_RESUME_MAP = {
-    'profile_hayden_cowell': 'resume_hayden_cowell_platform_pm',
-    'profile_senior_pm': 'resume_platform_pm',
-    'profile_midcareer_pm': 'resume_midcareer_pm_generalist',
-    'profile_senior_tpm': 'resume_senior_tpm',
-}
+Resumes are linked to profiles via `profile_id` on `ResumeBaseline` and `resume_ids` on `UserProfile`. `select_best_resume()` filters to linked resumes only — no fallback to unlinked resumes. When building the Phase 2 resume parser, set `profile_id` on the produced `ResumeBaseline` and append the `resume_id` to `profile.resume_ids`.
 ```
 
 ---
@@ -1029,6 +1034,12 @@ The original test profiles were built with self_assessed_gaps entries that dupli
 ### Why output length is constrained
 
 Output tokens are the primary cost driver at Sonnet's pricing. Unconstrained reasoning summaries were running 1,100-1,650 tokens per call. Adding length constraints (4 sentences max for reasoning, 5 items max for gaps) reduced output tokens by ~23% with no meaningful loss in assessment quality. Users read the first two sentences of reasoning most of the time anyway.
+
+### Why resumes are explicitly linked to profiles
+
+The original implementation used a hardcoded `PROFILE_RESUME_MAP` in the test harness to work around role_type matching failures when multiple resumes were present. In a multi-user system this approach breaks down — falling back to unlinked resumes risks scoring against another user's resume, which is both incorrect and a privacy problem.
+
+Resumes are now linked to profiles via `profile_id` on `ResumeBaseline` and `resume_ids` on `UserProfile`. If no linked resume is found the scorer returns a 400 error. The correct resolution is to collect a resume from the user via the Phase 2 resume parser or manual upload before scoring can proceed.
 
 ### Why the profile schema was migrated to a role-agnostic skill list
 

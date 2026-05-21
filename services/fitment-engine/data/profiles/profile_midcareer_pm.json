@@ -1,6 +1,7 @@
 {
   "profile_id": "profile_midcareer_pm",
   "profile_version": 1,
+  "resume_ids": ["resume_midcareer_pm_generalist"],
   "onboarding_complete": true,
   "target_roles": [
     "Product Manager",

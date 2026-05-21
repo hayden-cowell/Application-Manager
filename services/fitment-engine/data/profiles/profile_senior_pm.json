@@ -1,6 +1,7 @@
 {
   "profile_id": "profile_senior_pm",
   "profile_version": 1,
+  "resume_ids": ["resume_platform_pm"],
   "onboarding_complete": true,
   "target_roles": [
     "Senior PM",

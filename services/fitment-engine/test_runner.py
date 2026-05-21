@@ -7,6 +7,7 @@ Usage:
 """
 import argparse
 import json
+import sys
 import httpx
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,13 +15,6 @@ from pathlib import Path
 BASE_URL = 'http://localhost:8000'
 EXPECTATIONS_PATH = Path('data/test_cases/jd_expectations.json')
 RESULTS_DIR = Path('data/test_results')
-
-PROFILE_RESUME_MAP = {
-    'profile_hayden_cowell': 'resume_hayden_cowell_platform_pm',
-    'profile_senior_pm': 'resume_platform_pm',
-    'profile_midcareer_pm': 'resume_midcareer_pm_generalist',
-    'profile_senior_tpm': 'resume_senior_tpm',
-}
 
 
 def load_expectations() -> dict:
@@ -87,6 +81,12 @@ def run(profile_filter: str | None, job_filter: str | None):
     if job_filter:
         jobs = {k: v for k, v in jobs.items() if job_filter in k}
 
+    for profile_id, profile in profiles.items():
+        if not profile.get('resume_ids'):
+            print(f"ERROR: profile {profile_id} has no linked resumes.")
+            print("Add resume_ids to the profile or link a resume before running.")
+            sys.exit(1)
+
     print(f'Running {len(profiles)} profile(s) x {len(jobs)} job(s)')
     print('=' * 80)
 
@@ -98,15 +98,10 @@ def run(profile_filter: str | None, job_filter: str | None):
             label = f'{profile_id} x {job_id}'
             print(f'\n--- {label} ---')
             try:
-                resume_id = PROFILE_RESUME_MAP.get(profile_id)
-                resumes_for_profile = (
-                    [resumes[resume_id]] if resume_id and resume_id in resumes
-                    else list(resumes.values())
-                )
                 resp = httpx.post(f'{BASE_URL}/assess', json={
                     'job': job,
                     'profile': profile,
-                    'resumes': resumes_for_profile,
+                    'resumes': list(resumes.values()),
                     'save_result': True
                 }, timeout=60)
                 resp.raise_for_status()

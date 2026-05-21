@@ -95,6 +95,9 @@ class UserProfile(BaseModel):
     # Skills not yet collected (null / unknown state)
     unanswered_skills: list[str] = []
 
+    # Linked resumes
+    resume_ids: list[str] = []            # ordered list of resume_ids belonging to this profile
+
     # Metadata
     profile_id: str
     profile_version: int = 1
@@ -128,6 +131,7 @@ class ResumeBaseline(BaseModel):
     resume_id: str
     name: str                             # e.g. 'Platform PM', 'Consumer Apps PM'
     role_type: str                        # used for matching
+    profile_id: Optional[str] = None      # links this resume to a specific profile; null for unlinked/legacy resumes
     work_experience: list[WorkExperience]
     skills: list[str]
     version: int = 1

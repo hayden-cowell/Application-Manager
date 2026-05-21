@@ -137,12 +137,23 @@ def _print_totals(totals: dict, label: str):
 # Resume mapping
 # ---------------------------------------------------------------------------
 
-RESUME_MAP = {
-    'profile_hayden_cowell': 'resume_hayden_cowell_platform_pm',
-    'profile_senior_pm':     'resume_platform_pm',
-    'profile_midcareer_pm':  'resume_midcareer_pm_generalist',
-    'profile_senior_tpm':    'resume_senior_tpm',
-}
+def get_resume_for_profile(
+    profile: UserProfile,
+    resumes: dict[str, ResumeBaseline]
+) -> ResumeBaseline:
+    if not profile.resume_ids:
+        raise ValueError(
+            f"Profile {profile.profile_id} has no resume_ids. "
+            f"Link a resume before running ablation tests."
+        )
+    for resume_id in profile.resume_ids:
+        if resume_id in resumes:
+            return resumes[resume_id]
+    raise ValueError(
+        f"Profile {profile.profile_id} lists resume_ids {profile.resume_ids} "
+        f"but none were found in the loaded resumes. "
+        f"Ensure the resume file exists in data/resumes/."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -157,7 +168,7 @@ def run_category_1(jobs: dict, profiles: dict, resumes: dict) -> dict:
 
     full_profile  = profiles['profile_hayden_cowell']
     sparse_profile = build_sparse_profile(full_profile)
-    hayden_resume  = [resumes['resume_hayden_cowell_platform_pm']]
+    hayden_resume  = [get_resume_for_profile(full_profile, resumes)]
     totals  = _blank_totals()
     results = []
 
@@ -273,7 +284,7 @@ def run_category_2(jobs: dict, profiles: dict, resumes: dict) -> dict:
     print('      both signals are present. See ablation findings for details.')
 
     base   = profiles['profile_hayden_cowell']
-    resume = [resumes['resume_hayden_cowell_platform_pm']]
+    resume = [get_resume_for_profile(base, resumes)]
     totals = _blank_totals()
     all_flag_results: dict = {}
     fn_deltas_by_flag: dict[str, list] = {}
@@ -526,11 +537,12 @@ def run_category_3(jobs: dict, profiles: dict, resumes: dict) -> dict:
             if pid not in profiles:
                 print(f'  {pid}: NOT FOUND — skip')
                 continue
-            resume_key = RESUME_MAP.get(pid)
-            if not resume_key or resume_key not in resumes:
-                print(f'  {pid}: resume "{resume_key}" not found — skip')
+            try:
+                resume = get_resume_for_profile(profiles[pid], resumes)
+            except ValueError as e:
+                print(f'  {pid}: {e} — skip')
                 continue
-            r = run_score(job, profiles[pid], [resumes[resume_key]])
+            r = run_score(job, profiles[pid], [resume])
             _add_usage(totals, r)
             job_rows.append(r)
 

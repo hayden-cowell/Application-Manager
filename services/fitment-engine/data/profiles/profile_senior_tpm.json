@@ -1,6 +1,7 @@
 {
   "profile_id": "profile_senior_tpm",
   "profile_version": 1,
+  "resume_ids": ["resume_senior_tpm"],
   "onboarding_complete": true,
   "target_roles": [
     "Technical Product Manager",

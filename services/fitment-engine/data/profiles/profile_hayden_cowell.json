@@ -1,6 +1,7 @@
 {
   "profile_id": "profile_hayden_cowell",
   "profile_version": 1,
+  "resume_ids": ["resume_hayden_cowell_platform_pm"],
   "onboarding_complete": false,
   "target_roles": [
     "Product Manager",

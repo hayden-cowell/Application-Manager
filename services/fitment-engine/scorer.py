@@ -18,7 +18,13 @@ def score_job(request: ScoreRequest) -> tuple[FitAssessment, TokenUsage]:
         zero_usage = TokenUsage(input_tokens=0, output_tokens=0, estimated_cost_usd=0.0)
         return _build_gate_assessment(failures, request), zero_usage
 
-    best_resume = select_best_resume(request.job, request.resumes)
+    best_resume = select_best_resume(request.job, request.profile, request.resumes)
+    if best_resume is None and request.profile.resume_ids:
+        raise ValueError(
+            f"Profile {request.profile.profile_id} has resume_ids set but "
+            f"no matching resume was found in the request. Ensure the linked "
+            f"resume is included in ScoreRequest.resumes."
+        )
     prompt = build_scoring_prompt(request, best_resume)
     raw, usage = call_llm(prompt)
     parsed = parse_response(raw)
@@ -224,21 +230,27 @@ def _extract_non_us_country(location: str, description: str) -> str | None:
 
 def select_best_resume(
     job: JobPosting,
+    profile,
     resumes: list[ResumeBaseline]
 ) -> ResumeBaseline | None:
-    if not resumes:
+    if not profile.resume_ids:
         return None
 
-    # Exact role type match first
+    # Filter to resumes explicitly linked to this profile
+    profile_resumes = [r for r in resumes if r.resume_id in profile.resume_ids]
+
+    if not profile_resumes:
+        return None
+
+    # Match on role_type against job title
     job_title_lower = job.title.lower()
-    for resume in resumes:
+    for resume in profile_resumes:
         if resume.role_type.lower() in job_title_lower:
             return resume
 
-    # Fall back to most recently used
-    with_dates = [r for r in resumes if r.last_used]
+    # Fall back to most recently used linked resume
+    with_dates = [r for r in profile_resumes if r.last_used]
     if with_dates:
         return sorted(with_dates, key=lambda r: r.last_used, reverse=True)[0]
 
-    # Otherwise return first
-    return resumes[0]
+    return profile_resumes[0]

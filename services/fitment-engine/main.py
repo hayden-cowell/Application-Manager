@@ -17,6 +17,8 @@ async def assess(request: ScoreRequest):
         if request.save_result:
             save_assessment(assessment)
         return AssessmentResponse(assessment=assessment, token_usage=token_usage)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
