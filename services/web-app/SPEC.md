@@ -68,6 +68,10 @@ Accepts resume input, calls the resume parser, saves the result, and returns par
 
 Forwards follow-up answers to the resume parser and returns the updated profile.
 
+**Pre-processing before forwarding:**
+- `self_assessed_gaps`: split the free-form string on commas or newlines, strip whitespace, filter empty strings → `list[str]`
+- All other fields: pass through as-is
+
 **Request body:**
 ```json
 {
@@ -94,14 +98,20 @@ Loads the profile and its linked resumes from local storage, calls the fitment e
 ```json
 {
   "job_description": "<raw JD text>",
-  "profile_id": "profile_abc123"
+  "profile_id": "profile_abc123",
+  "title": "Senior Product Manager",   // optional — user-supplied
+  "company": "Acme Corp"               // optional — user-supplied
 }
 ```
+
+`title` and `company` are optional. If omitted, the backend uses placeholder values (`"Unknown Role"`, `"Unknown Company"`). `location` defaults to `"Remote"`.
+
+**Why this matters:** the fitment engine's eligibility gate uses `job.title` to detect executive roles (VP, Director) and `job.location` for onsite detection. Placeholder values are safe defaults — they won't trigger false gate failures — but supplying real values produces more accurate eligibility decisions.
 
 **Behavior:**
 1. Loads `UserProfile` from storage by `profile_id`
 2. Loads all `ResumeBaseline` objects listed in `profile.resume_ids`
-3. Constructs a `JobPosting` from the raw description (generates a `job_id`, uses placeholder `title`, `company`, `location`)
+3. Constructs a `JobPosting` with provided `title`/`company` (or placeholders), generates a `job_id`, sets `location` to `"Remote"` unless specified
 4. Calls fitment engine `POST /assess`
 5. Returns the `AssessmentResponse`
 
@@ -204,8 +214,10 @@ Screen 4 (Assessment Result)
 
 **Shown only if** `fields_requiring_followup` is non-empty after Screen 1.
 
+**Important:** render inputs **only for fields present in `fields_requiring_followup`**. Do not render all 11 fields every time. Most users will have several inferred correctly (e.g. location infers timezone). The frontend maps each field name from `fields_requiring_followup` to its input component and renders only those.
+
 **Elements:**
-- One question per field from `fields_requiring_followup`
+- One question per field from `fields_requiring_followup` — rendered dynamically
 - Input types per field:
 
 | Field | Input type |
@@ -218,7 +230,7 @@ Screen 4 (Assessment Result)
 | `work_authorization` | Select: Citizen / Permanent Resident / Visa / Needs Sponsorship |
 | `requires_sponsorship` | Radio: Yes / No |
 | `willing_to_relocate` | Radio: Yes / No |
-| `self_assessed_gaps` | Text area (free-form) |
+| `self_assessed_gaps` | Text area (free-form, comma- or newline-separated) |
 | `country` | Text input |
 | `timezone` | Text input (e.g. "PT", "ET") |
 
@@ -234,6 +246,8 @@ Screen 4 (Assessment Result)
 
 **Elements:**
 - Text area: "Paste the job description here" (Chrome extension will populate this in Phase 3)
+- Text input: "Job title (optional)" — maps to `title` in request body
+- Text input: "Company (optional)" — maps to `company` in request body
 - Submit button: "Score This Job"
 - Loading state while `POST /api/score` is in flight
 
